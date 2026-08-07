@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next";
-import { categorySlugs, stories } from "./content";
+import { categorySlugs } from "./content";
+import { getPublishedStories } from "./posts-data";
 import { absoluteUrl } from "./site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const stories = await getPublishedStories();
   const latestStoryDate = new Date(Math.max(...stories.map((story) => Date.parse(story.updatedAt))));
   const staticPages = ["", "/about", "/editorial-standards", "/contact", "/privacy", "/terms", "/cookies"];
   const pages: MetadataRoute.Sitemap = staticPages.map((path) => ({

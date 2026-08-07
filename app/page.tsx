@@ -5,9 +5,10 @@ import { StoryCard } from "./components/StoryCard";
 import { AdSlot } from "./components/AdSlot";
 import { NewsletterForm } from "./components/NewsletterForm";
 import { SiteFooter } from "./components/SiteFooter";
-import { stories } from "./content";
+import { getPublishedStories } from "./posts-data";
 
-export default function Home() {
+export default async function Home() {
+  const stories = await getPublishedStories();
   const featured = stories.find((story) => story.featured) ?? stories[0];
   return (
     <main>

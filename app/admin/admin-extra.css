@@ -1,0 +1,19 @@
+.admin-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-title-actions > button {
+  border: 1px solid #cbd5e4;
+  border-radius: 6px;
+  background: #fff;
+  padding: 11px 14px;
+  color: #4d5b72;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 620px) {
+  .admin-title-actions { align-items: stretch; flex-direction: column; }
+}

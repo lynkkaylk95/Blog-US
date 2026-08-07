@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Header } from "../../components/Header";
 import { SiteFooter } from "../../components/SiteFooter";
 import { StoryCard } from "../../components/StoryCard";
-import { stories } from "../../content";
+import { getPublishedStories } from "../../posts-data";
 
 const categories: Record<string, string> = {
   "family-legacy": "Family & Legacy",
@@ -24,6 +24,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const category = categories[slug];
   if (!category) notFound();
+  const stories = await getPublishedStories();
   const categoryStories = stories.filter((story) => story.category === category);
 
   return <main><Header /><section className="category-page shell"><span className="eyebrow">Browse by theme</span><h1>{category}</h1><p>Thoughtful stories about the moments that shape a life.</p><div className="latest-grid">{categoryStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section><SiteFooter /></main>;

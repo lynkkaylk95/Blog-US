@@ -98,6 +98,8 @@ Story metadata and chapters are stored as Markdown in `content/stories`. Drafts 
 
 Analytics and Search Console configuration is documented in `docs/ANALYTICS_SETUP.md`.
 
+Admin, D1 migrations, authentication, and the rich-text publishing workflow are documented in `docs/ADMIN_SETUP.md`.
+
 ## Learn More
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)

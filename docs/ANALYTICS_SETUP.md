@@ -11,7 +11,7 @@ Configure these environment variables in Cloudflare before the production deploy
 
 ## Google Analytics
 
-The current GA4 Measurement ID is `G-2D0SSCEYRN`. The site uses basic consent mode: no Google script or request is made before a visitor allows optional analytics. Advertising storage and personalization remain denied. Set `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` only when you need to override this property.
+The current GA4 Measurement ID is `G-2D0SSCEYRN`. Google Analytics loads by default without a consent popup. Advertising storage and personalization remain denied. Set `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` only when you need to override this property. Review consent requirements before serving regions where prior consent is required.
 
 ## Google Search Console
 

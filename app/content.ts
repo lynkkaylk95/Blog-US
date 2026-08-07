@@ -15,6 +15,7 @@ export type Story = {
   chapters: Chapter[];
   date: string;
   updatedDate: string;
+  contentHtml?: string;
 };
 
 export const categorySlugs: Record<string, string> = {

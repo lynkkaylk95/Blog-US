@@ -3,7 +3,6 @@ import "./globals.css";
 import "./content.css";
 import { defaultGoogleAnalyticsId, siteDescription, siteName, siteUrl } from "./site";
 import { CloudflareAnalytics, GoogleAnalytics } from "./components/Analytics";
-import { CookieConsent } from "./components/CookieConsent";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -31,5 +30,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const configuredCloudflareToken = process.env.NEXT_PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
   const googleAnalyticsId = configuredGoogleId && /^G-[A-Z0-9]+$/i.test(configuredGoogleId) ? configuredGoogleId : undefined;
   const cloudflareToken = configuredCloudflareToken && /^[a-f0-9]{32}$/i.test(configuredCloudflareToken) ? configuredCloudflareToken : undefined;
-  return <html lang="en"><body>{children}<GoogleAnalytics measurementId={googleAnalyticsId} /><CloudflareAnalytics token={cloudflareToken} /><CookieConsent enabled={Boolean(googleAnalyticsId)} /></body></html>;
+  return <html lang="en"><body>{children}<GoogleAnalytics measurementId={googleAnalyticsId} /><CloudflareAnalytics token={cloudflareToken} /></body></html>;
 }

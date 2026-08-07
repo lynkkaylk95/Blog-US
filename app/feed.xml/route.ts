@@ -1,4 +1,4 @@
-import { stories } from "../content";
+import { getPublishedStories } from "../posts-data";
 import { absoluteUrl, siteDescription, siteName } from "../site";
 
 function escapeXml(value: string) {
@@ -7,7 +7,8 @@ function escapeXml(value: string) {
   })[character] || character);
 }
 
-export function GET() {
+export async function GET() {
+  const stories = await getPublishedStories();
   const items = stories.map((story) => {
     const url = absoluteUrl(`/story/${story.slug}`);
     return `<item>
