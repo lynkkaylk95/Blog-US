@@ -11,11 +11,11 @@ export function Header() {
         </Link>
         <nav aria-label="Main navigation">
           <Link href="/#latest">Latest</Link>
-          <Link href="/#family">Family</Link>
-          <Link href="/#second-chances">Second Chances</Link>
+          <Link href="/category/family-legacy">Family</Link>
+          <Link href="/category/second-chances">Second Chances</Link>
           <Link href="/#popular">Most Read</Link>
         </nav>
-        <button className="header-button" aria-label="Open reading settings">Aa <span>Reading</span></button>
+        <Link href="/#newsletter" className="header-button">Join free <span>→</span></Link>
       </header>
     </>
   );

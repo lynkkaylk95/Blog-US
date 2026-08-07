@@ -6,6 +6,7 @@ export type Story = {
   image: string;
   readTime: string;
   date: string;
+  publishedAt: string;
   featured?: boolean;
 };
 
@@ -23,6 +24,7 @@ export const stories: Story[] = [
     image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?auto=format&fit=crop&w=1600&q=85",
     readTime: "12 min read",
     date: "July 21, 2026",
+    publishedAt: "2026-07-21T19:00:00-04:00",
     featured: true,
   },
   {
@@ -33,6 +35,7 @@ export const stories: Story[] = [
     image: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&q=85",
     readTime: "9 min read",
     date: "July 20, 2026",
+    publishedAt: "2026-07-20T19:00:00-04:00",
   },
   {
     slug: "the-woman-on-platform-nine",
@@ -42,6 +45,7 @@ export const stories: Story[] = [
     image: "https://images.unsplash.com/photo-1473445361085-b9a07f55608b?auto=format&fit=crop&w=1200&q=85",
     readTime: "8 min read",
     date: "July 19, 2026",
+    publishedAt: "2026-07-19T19:00:00-04:00",
   },
   {
     slug: "a-key-to-the-house-on-maple-street",
@@ -51,6 +55,7 @@ export const stories: Story[] = [
     image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85",
     readTime: "14 min read",
     date: "July 18, 2026",
+    publishedAt: "2026-07-18T19:00:00-04:00",
   },
   {
     slug: "the-dance-they-never-had",
@@ -60,6 +65,7 @@ export const stories: Story[] = [
     image: "https://images.unsplash.com/photo-1507501336603-6e31db2be093?auto=format&fit=crop&w=1200&q=85",
     readTime: "7 min read",
     date: "July 17, 2026",
+    publishedAt: "2026-07-17T19:00:00-04:00",
   },
   {
     slug: "the-recipe-in-the-margin",
@@ -69,8 +75,18 @@ export const stories: Story[] = [
     image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1200&q=85",
     readTime: "6 min read",
     date: "July 16, 2026",
+    publishedAt: "2026-07-16T19:00:00-04:00",
   },
 ];
+
+export const categorySlugs: Record<string, string> = {
+  "Family & Legacy": "family-legacy",
+  "Second Chances": "second-chances",
+  "Life Stories": "life-stories",
+  "Justice & Truth": "justice-truth",
+  "Love After 50": "love-after-50",
+  Grandparents: "grandparents",
+};
 
 const blueTinChapters: Chapter[] = [
   {
