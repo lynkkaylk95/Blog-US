@@ -10,7 +10,7 @@ export default function Home() {
     <main>
       <Header />
       <section className="hero shell">
-        <div className="hero-image"><img src={featured.image} alt="An older woman reflecting at home" /><span className="photo-label">TODAY'S FEATURED STORY</span></div>
+        <div className="hero-image"><img src={featured.image} alt="An older woman reflecting at home" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
         <div className="hero-copy">
           <span className="eyebrow">{featured.category}</span>
           <h1>{featured.title}</h1>

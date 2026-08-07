@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { chapters } from "../../data";
+import type { Chapter } from "../../data";
 import { AdSlot } from "../../components/AdSlot";
 
-export function Reader() {
+export function Reader({ chapters }: { chapters: Chapter[] }) {
   const [fontSize, setFontSize] = useState(22);
   const [theme, setTheme] = useState<"paper" | "cream" | "night">("paper");
   const [settings, setSettings] = useState(false);
