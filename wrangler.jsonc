@@ -7,7 +7,7 @@
     {
       "binding": "DB",
       "database_name": "porchlight-stories",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "c1ee31fe-9cb7-4c55-9e3b-8af200275698",
       "migrations_dir": "drizzle"
     }
   ]
