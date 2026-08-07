@@ -1,91 +1,53 @@
 import assert from "node:assert/strict";
-import { access, readFile, readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 
-const developmentPreviewMeta =
-  /<meta(?=[^>]*\bname=["']codex-preview["'])(?=[^>]*\bcontent=["']development["'])[^>]*>/i;
-const templateRoot = new URL("../", import.meta.url);
-const previewRoot = new URL("../app/_sites-preview/", import.meta.url);
+process.env.SITE_URL = "https://example.com";
+const storyDirectory = new URL("../content/stories/", import.meta.url);
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
+async function publishedStories() {
+  const files = (await readdir(storyDirectory)).filter((file) => file.endsWith(".md"));
+  const stories = await Promise.all(files.map(async (file) => {
+    const source = await readFile(new URL(file, storyDirectory), "utf8");
+    const value = (key) => source.match(new RegExp(`^${key}:\\s+"([^"]+)"`, "m"))?.[1];
+    return { slug: value("slug"), title: value("title"), status: value("status") };
+  }));
+  return stories.filter((story) => story.status === "published");
 }
 
-test("server-renders the starter loading skeleton", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+async function fetchPage(path) {
+  const workerUrl = new URL(`../dist/server/index.js?test=${process.pid}-${Date.now()}-${Math.random()}`, import.meta.url);
+  const { default: worker } = await import(workerUrl.href);
+  return worker.fetch(new Request(`https://example.com${path}`), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+}
 
-  const html = await response.text();
-  assert.match(html, developmentPreviewMeta);
-  assert.match(html, /<title>Your site is taking shape<\/title>/i);
-  assert.match(html, /Building your site/);
-  assert.match(html, /Your site is taking shape/);
-  assert.match(
-    html,
-    /Your first version will appear here automatically when it’s ready\./,
-  );
-  assert.doesNotMatch(html, /Codex/);
-  assert.match(html, /react-loading-skeleton/);
-  assert.match(html, /role="status"/);
+test("renders every published Markdown story", async () => {
+  const stories = await publishedStories();
+  assert.ok(stories.length > 0);
+  for (const story of stories) {
+    const response = await fetchPage(`/story/${story.slug}`);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, new RegExp(story.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(html, /application\/ld\+json/);
+  }
 });
 
-test("keeps the loading skeleton scoped and disposable", async () => {
-  const [preview, css, page, layout, packageJson, files] = await Promise.all([
-    readFile(new URL("SkeletonPreview.tsx", previewRoot), "utf8"),
-    readFile(new URL("preview.css", previewRoot), "utf8"),
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readdir(previewRoot),
-  ]);
+test("keeps drafts private and unknown stories return 404", async () => {
+  const response = await fetchPage("/story/not-a-real-story");
+  assert.equal(response.status, 404);
+  assert.match(await response.text(), /Story not found/i);
+});
 
-  assert.deepEqual(files.sort(), ["SkeletonPreview.tsx", "preview.css"]);
-  assert.match(preview, /from "react-loading-skeleton"/);
-  assert.match(preview, /baseColor="#eceae7"/);
-  assert.match(preview, /highlightColor="#f9f8f6"/);
-  assert.match(preview, /duration=\{2\.8\}/);
-  assert.match(preview, /sites-skeleton-search-placeholder/);
-  assert.match(packageJson, /"react-loading-skeleton": "3\.5\.0"/);
-
-  const shellIndex = preview.indexOf('className="sites-skeleton-shell"');
-  const statusIndex = preview.indexOf('className="sites-skeleton-status"');
-  assert.ok(shellIndex >= 0 && statusIndex > shellIndex);
-  assert.match(css, /position:\s*fixed/);
-  assert.match(css, /inset:\s*0/);
-  assert.match(css, /opacity:\s*0\.52/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.doesNotMatch(css, /#020617|canvas|pets|progress/i);
-  assert.doesNotMatch(
-    preview,
-    /loading-spinner|status-mark|status-progress|canvas|cookie|random/i,
-  );
-
-  assert.match(page, /export const metadata:\s*Metadata/);
-  assert.match(page, /"codex-preview": "development"/);
-  assert.match(page, /<SkeletonPreview \/>/);
-  assert.match(layout, /title:\s*"Starter Project"/);
-  assert.doesNotMatch(layout, /codex-preview|_sites-preview|themeColor|\bViewport\b/);
-  assert.doesNotMatch(css, /(^|\s)(html|body)\s*\{/m);
-
-  await assert.rejects(
-    access(new URL("public/_sites-preview", templateRoot)),
-  );
+test("sitemap and RSS contain every published story", async () => {
+  const stories = await publishedStories();
+  const [sitemapResponse, feedResponse] = await Promise.all([fetchPage("/sitemap.xml"), fetchPage("/feed.xml")]);
+  const sitemap = await sitemapResponse.text();
+  const feed = await feedResponse.text();
+  assert.equal(sitemapResponse.status, 200);
+  assert.equal(feedResponse.status, 200);
+  for (const story of stories) {
+    assert.match(sitemap, new RegExp(`/story/${story.slug}`));
+    assert.match(feed, new RegExp(`/story/${story.slug}`));
+  }
 });

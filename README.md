@@ -92,6 +92,12 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 - `npm test`: build the starter and verify its rendered loading skeleton
 - `npm run db:generate`: generate Drizzle migrations after schema changes
 
+## Publishing stories
+
+Story metadata and chapters are stored as Markdown in `content/stories`. Drafts are excluded from public pages, the sitemap, and RSS. See `content/README.md` for the publishing workflow and use `content/templates/story.md` when starting a new story.
+
+Analytics and Search Console configuration is documented in `docs/ANALYTICS_SETUP.md`.
+
 ## Learn More
 
 - [vinext Documentation](https://github.com/cloudflare/vinext)

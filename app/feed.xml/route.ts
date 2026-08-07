@@ -1,4 +1,4 @@
-import { stories } from "../data";
+import { stories } from "../content";
 import { absoluteUrl, siteDescription, siteName } from "../site";
 
 function escapeXml(value: string) {
@@ -29,7 +29,7 @@ export function GET() {
     <link>${escapeXml(absoluteUrl("/"))}</link>
     <description>${escapeXml(siteDescription)}</description>
     <language>en-us</language>
-    <lastBuildDate>${new Date(stories[0].publishedAt).toUTCString()}</lastBuildDate>
+    <lastBuildDate>${new Date(Math.max(...stories.map((story) => Date.parse(story.updatedAt)))).toUTCString()}</lastBuildDate>
     <atom:link href="${escapeXml(absoluteUrl("/feed.xml"))}" rel="self" type="application/rss+xml" />
     ${items}
   </channel>

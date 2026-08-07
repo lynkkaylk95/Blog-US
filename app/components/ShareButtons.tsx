@@ -7,13 +7,17 @@ export function ShareButtons({ title }: { title: string }) {
 
   async function share() {
     const url = window.location.href;
-    if (navigator.share) {
-      await navigator.share({ title, url });
-      return;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
     }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
   }
 
   function email() {

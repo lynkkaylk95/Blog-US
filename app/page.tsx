@@ -1,18 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "./components/Header";
 import { StoryCard } from "./components/StoryCard";
 import { AdSlot } from "./components/AdSlot";
 import { NewsletterForm } from "./components/NewsletterForm";
 import { SiteFooter } from "./components/SiteFooter";
-import { stories } from "./data";
+import { stories } from "./content";
 
 export default function Home() {
-  const featured = stories[0];
+  const featured = stories.find((story) => story.featured) ?? stories[0];
   return (
     <main>
       <Header />
       <section className="hero shell">
-        <div className="hero-image"><img src={featured.image} alt="An older woman reflecting at home" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
+        <div className="hero-image"><Image src={featured.image} alt={featured.imageAlt} fill priority sizes="(max-width: 900px) 100vw, 58vw" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
         <div className="hero-copy">
           <span className="eyebrow">{featured.category}</span>
           <h1>{featured.title}</h1>

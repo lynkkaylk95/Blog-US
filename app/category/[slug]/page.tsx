@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Header } from "../../components/Header";
 import { SiteFooter } from "../../components/SiteFooter";
 import { StoryCard } from "../../components/StoryCard";
-import { stories } from "../../data";
+import { stories } from "../../content";
 
 const categories: Record<string, string> = {
   "family-legacy": "Family & Legacy",

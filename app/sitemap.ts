@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-import { categorySlugs, stories } from "./data";
+import { categorySlugs, stories } from "./content";
 import { absoluteUrl } from "./site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const latestStoryDate = new Date(Math.max(...stories.map((story) => Date.parse(story.publishedAt))));
+  const latestStoryDate = new Date(Math.max(...stories.map((story) => Date.parse(story.updatedAt))));
   const staticPages = ["", "/about", "/editorial-standards", "/contact", "/privacy", "/terms", "/cookies"];
   const pages: MetadataRoute.Sitemap = staticPages.map((path) => ({
     url: absoluteUrl(path || "/"),
@@ -19,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
   const storyPages: MetadataRoute.Sitemap = stories.map((story) => ({
     url: absoluteUrl(`/story/${story.slug}`),
-    lastModified: new Date(story.publishedAt),
+    lastModified: new Date(story.updatedAt),
     changeFrequency: "monthly",
     priority: story.featured ? 0.9 : 0.8,
     images: [story.image],

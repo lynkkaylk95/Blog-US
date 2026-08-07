@@ -1,10 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "../../components/Header";
 import { AdSlot } from "../../components/AdSlot";
 import { StoryCard } from "../../components/StoryCard";
-import { categorySlugs, chaptersBySlug, stories } from "../../data";
+import { categorySlugs, stories } from "../../content";
 import { Reader } from "./Reader";
 import { ShareButtons } from "../../components/ShareButtons";
 import { absoluteUrl, siteName } from "../../site";
@@ -34,6 +35,7 @@ export async function generateMetadata({ params }: StoryPageProps): Promise<Meta
       title: story.title,
       description: story.excerpt,
       publishedTime: story.publishedAt,
+      modifiedTime: story.updatedAt,
       authors: ["Porchlight Editors"],
       images: [{ url: story.image, alt: story.title }],
     },
@@ -49,7 +51,6 @@ export default async function StoryPage({ params }: StoryPageProps) {
     notFound();
   }
 
-  const chapters = chaptersBySlug[story.slug];
   const relatedStories = stories.filter((item) => item.slug !== story.slug).slice(0, 3);
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -58,7 +59,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
     description: story.excerpt,
     image: [story.image],
     datePublished: story.publishedAt,
-    dateModified: story.publishedAt,
+    dateModified: story.updatedAt,
     mainEntityOfPage: absoluteUrl(`/story/${story.slug}`),
     author: { "@type": "Organization", name: "Porchlight Editors", url: absoluteUrl("/editorial-standards") },
     publisher: { "@type": "Organization", name: siteName, url: absoluteUrl("/"), logo: { "@type": "ImageObject", url: absoluteUrl("/og.png") } },
@@ -73,11 +74,11 @@ export default async function StoryPage({ params }: StoryPageProps) {
       <span className="eyebrow">{story.category}</span>
       <h1>{story.title}</h1>
       <p className="article-deck">{story.excerpt}</p>
-      <div className="article-byline"><div className="author-avatar">PS</div><div><b>By Porchlight Editors</b><span>{story.date} · {story.readTime}</span></div><ShareButtons title={story.title} /></div>
+      <div className="article-byline"><div className="author-avatar">PS</div><div><b>By Porchlight Editors</b><span>{story.date} · {story.readTime}</span>{story.updatedDate !== story.date && <span>Updated {story.updatedDate}</span>}</div><ShareButtons title={story.title} /></div>
     </article>
-    <div className="article-image"><img src={story.image} alt="A reflective moment at home" /></div>
+    <div className="article-image"><Image src={story.image} alt={story.imageAlt} fill priority sizes="(max-width: 620px) 100vw, 1100px" /></div>
     <div className="shell"><AdSlot /></div>
-    <Reader chapters={chapters} />
+    <Reader chapters={story.chapters} />
     <section className="more-stories shell"><div className="section-heading"><div><span className="eyebrow">Keep reading</span><h2>More stories for you</h2></div></div><div className="popular-grid">{relatedStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section>
     <footer className="article-footer"><Link href="/">← Back to Porchlight Stories</Link><span>© 2026 Porchlight Stories</span></footer>
   </main>;

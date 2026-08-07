@@ -80,3 +80,102 @@
   .info-page h1,
   .category-page h1 { font-size: 44px; }
 }
+
+@media (max-width: 900px) {
+  .site-header {
+    height: auto;
+    min-height: 72px;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-block: 14px;
+  }
+
+  .site-header nav {
+    display: flex;
+    order: 3;
+    width: 100%;
+    gap: 22px;
+    padding: 12px 0 3px;
+    overflow-x: auto;
+    border-top: 1px solid var(--line);
+    scrollbar-width: none;
+  }
+
+  .site-header nav::-webkit-scrollbar { display: none; }
+  .site-header nav a { flex: 0 0 auto; }
+}
+
+@media (max-width: 420px) {
+  .header-button { padding-inline: 12px; }
+  .header-button span { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.consent-banner {
+  position: fixed;
+  z-index: 100;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  max-width: 980px;
+  margin-inline: auto;
+  padding: 20px 22px;
+  border: 1px solid #52605c;
+  border-radius: 6px;
+  background: #1f2422;
+  color: #fff;
+  box-shadow: 0 16px 50px #0005;
+}
+
+.consent-banner > div:first-child { flex: 1; }
+.consent-banner b { font: 700 19px var(--serif); }
+.consent-banner p { margin: 6px 0 0; color: #cbd3d0; font-size: 13px; line-height: 1.55; }
+.consent-banner a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.consent-actions { display: flex; gap: 8px; }
+.consent-actions button,
+.text-button { border: 0; border-radius: 3px; background: var(--wine); color: #fff; padding: 11px 14px; font-weight: 700; cursor: pointer; }
+.consent-actions .consent-secondary { border: 1px solid #6f7c78; background: transparent; }
+.text-button { margin-top: 10px; }
+
+@media (max-width: 720px) {
+  .consent-banner { align-items: stretch; flex-direction: column; gap: 16px; }
+  .consent-actions { flex-direction: column-reverse; }
+  .consent-actions button { width: 100%; }
+}
+.article-image {
+  position: relative;
+}
+
+:root {
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+:focus-visible {
+  outline: 3px solid #b34b66;
+  outline-offset: 3px;
+}
+
+.site-header nav a,
+.footer-grid a {
+  text-underline-offset: 4px;
+}
+
+.site-header nav a:hover,
+.site-header nav a:focus-visible,
+.footer-grid a:hover,
+.footer-grid a:focus-visible {
+  text-decoration: underline;
+}

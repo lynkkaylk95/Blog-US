@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Chapter } from "../../data";
+import type { Chapter } from "../../content";
 import { AdSlot } from "../../components/AdSlot";
 
 export function Reader({ chapters }: { chapters: Chapter[] }) {
@@ -23,11 +23,11 @@ export function Reader({ chapters }: { chapters: Chapter[] }) {
 
   return (
     <>
-      <div className="reading-progress" style={{ width: `${progress}%` }} />
+      <div className="reading-progress" style={{ width: `${progress}%` }} aria-hidden="true" />
       <div className={`reader-toolbar ${settings ? "open" : ""}`}>
         <button onClick={() => setSettings(!settings)} aria-expanded={settings}>Aa <span>Reading settings</span></button>
         {settings && <div className="settings-panel">
-          <div><b>Text size</b><button onClick={() => setFontSize(Math.max(18, fontSize - 2))}>A−</button><span>{fontSize}</span><button onClick={() => setFontSize(Math.min(32, fontSize + 2))}>A+</button></div>
+          <div><b>Text size</b><button onClick={() => setFontSize(Math.max(18, fontSize - 2))} aria-label="Decrease text size">A−</button><span aria-live="polite">{fontSize}</span><button onClick={() => setFontSize(Math.min(32, fontSize + 2))} aria-label="Increase text size">A+</button></div>
           <div><b>Page color</b><button className="swatch white" onClick={() => setTheme("paper")} aria-label="White page" /><button className="swatch cream" onClick={() => setTheme("cream")} aria-label="Cream page" /><button className="swatch dark" onClick={() => setTheme("night")} aria-label="Dark page" /></div>
         </div>}
       </div>
@@ -48,7 +48,7 @@ export function Reader({ chapters }: { chapters: Chapter[] }) {
           <section className="reaction-box">
             <span className="eyebrow">Your turn</span>
             <h2>How did this story make you feel?</h2>
-            <div>{["♥ Heartwarming", "★ Satisfying", "! Surprising"].map(item => <button className={reaction === item ? "selected" : ""} onClick={() => setReaction(item)} key={item}>{item}</button>)}</div>
+            <div role="group" aria-label="Story reactions">{["♥ Heartwarming", "★ Satisfying", "! Surprising"].map(item => <button type="button" className={reaction === item ? "selected" : ""} aria-pressed={reaction === item} onClick={() => setReaction(item)} key={item}>{item}</button>)}</div>
             {reaction && <p>Thank you for sharing.</p>}
           </section>
         </div>
