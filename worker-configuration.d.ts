@@ -4,6 +4,7 @@ interface Env {
   IMAGES: ImagesBinding;
   ADMIN_PASSWORD?: string;
   ADMIN_SESSION_SECRET?: string;
+  PASSWORD_RESET_EMAIL?: SendEmail;
   SITE_URL?: string;
 }
 

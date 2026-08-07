@@ -10,5 +10,12 @@
       "database_id": "c1ee31fe-9cb7-4c55-9e3b-8af200275698",
       "migrations_dir": "drizzle"
     }
+  ],
+  "send_email": [
+    {
+      "name": "PASSWORD_RESET_EMAIL",
+      "destination_address": "tuanlinhnguyen765@gmail.com",
+      "allowed_sender_addresses": ["admin@cinemaxmx.com"]
+    }
   ]
 }

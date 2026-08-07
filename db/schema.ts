@@ -17,3 +17,18 @@ export const posts = sqliteTable("posts", {
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
+
+export const adminCredentials = sqliteTable("admin_credentials", {
+  id: integer("id").primaryKey(),
+  passwordHash: text("password_hash").notNull(),
+  passwordSalt: text("password_salt").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const adminPasswordResets = sqliteTable("admin_password_resets", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: text("expires_at").notNull(),
+  usedAt: text("used_at"),
+  createdAt: text("created_at").notNull(),
+});
