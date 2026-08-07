@@ -1,0 +1,41 @@
+"use client";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+
+export type AdminLocale = "en" | "vi";
+
+const translations = {
+  en: {
+    language: "Language", english: "English", vietnamese: "Tiếng Việt", overview: "Overview", posts: "Posts", addStory: "Add story", viewWebsite: "View website", settings: "Settings", signOut: "Sign out", contentManagement: "Content management", openSite: "Open site",
+    signInTitle: "Porchlight Admin", signInDescription: "Sign in to manage stories.", adminPassword: "Admin password", signIn: "Sign in", signingIn: "Signing in…", forgotPassword: "Forgot password?", sendingReset: "Sending reset link…", checkEmail: "Please check the administrator email.", loginFailed: "Login failed.",
+    blog: "Blog", managePosts: "Manage posts", managePostsDescription: "Create, edit and publish Porchlight stories.", importStories: "Import existing stories", addPost: "Add post", totalPosts: "Total posts", published: "Published", drafts: "Drafts", searchPlaceholder: "Search title or slug…", allStatuses: "All statuses", story: "Story", category: "Category", updated: "Updated", status: "Status", actions: "Actions", noPosts: "No posts match these filters.", loadingPosts: "Loading posts…", couldNotLoad: "Could not load posts.", deleteConfirm: "Delete “{title}”? This cannot be undone.", deleteFailed: "Could not delete this post.", linkCopied: "Link copied.", importing: "Importing bundled stories…", importFailed: "Import failed.", imported: "{count} stories imported.", view: "View", copyLink: "Copy link", edit: "Edit", delete: "Delete", draft: "Draft",
+    editPost: "Edit post", newPost: "Add post", editorDescription: "Write, format and publish a story.", backToPosts: "Back to posts", title: "Title", slug: "Slug", excerpt: "Excerpt", featuredImage: "Featured image URL", imageDescription: "Image description", readTime: "Read time", featuredHomepage: "Featured on homepage", storyContent: "Story content", paragraph: "Paragraph", heading2: "Heading 2", heading3: "Heading 3", quote: "Quote", small: "Small", normal: "Normal", large: "Large", extraLarge: "Extra large", list: "List", image: "Image", video: "Video", cancel: "Cancel", saving: "Saving…", publishPost: "Publish post", saveDraft: "Save draft", loadingEditor: "Loading editor…", postNotFound: "Post not found.", saveFailed: "Could not save the post.",
+    resetTitle: "Reset password", resetDescription: "Create a new password for Porchlight Admin.", newPassword: "New password", confirmPassword: "Confirm password", updatePassword: "Update password", updating: "Updating…", passwordMismatch: "Passwords do not match.", resetSuccess: "Password updated successfully.", resetFailed: "Could not reset password.", continueSignIn: "Continue to sign in",
+    system: "System", settingsDescription: "Configuration is managed securely through Cloudflare environment variables.", requiredConfiguration: "Required configuration", d1Binding: "D1 binding", sessionSecret: "Session signing secret", canonicalWebsite: "Canonical website", secretNote: "Secrets are never displayed in the browser. Change them from the Cloudflare dashboard.",
+  },
+  vi: {
+    language: "Ngôn ngữ", english: "English", vietnamese: "Tiếng Việt", overview: "Tổng quan", posts: "Bài viết", addStory: "Thêm bài viết", viewWebsite: "Xem trang web", settings: "Cài đặt", signOut: "Đăng xuất", contentManagement: "Quản lý nội dung", openSite: "Mở trang web",
+    signInTitle: "Quản trị Porchlight", signInDescription: "Đăng nhập để quản lý bài viết.", adminPassword: "Mật khẩu quản trị", signIn: "Đăng nhập", signingIn: "Đang đăng nhập…", forgotPassword: "Quên mật khẩu?", sendingReset: "Đang gửi liên kết…", checkEmail: "Vui lòng kiểm tra email quản trị viên.", loginFailed: "Đăng nhập thất bại.",
+    blog: "Blog", managePosts: "Quản lý bài viết", managePostsDescription: "Tạo, chỉnh sửa và xuất bản bài viết Porchlight.", importStories: "Nhập bài viết hiện có", addPost: "Thêm bài viết", totalPosts: "Tổng bài viết", published: "Đã xuất bản", drafts: "Bản nháp", searchPlaceholder: "Tìm tiêu đề hoặc slug…", allStatuses: "Tất cả trạng thái", story: "Bài viết", category: "Danh mục", updated: "Cập nhật", status: "Trạng thái", actions: "Thao tác", noPosts: "Không có bài viết phù hợp.", loadingPosts: "Đang tải bài viết…", couldNotLoad: "Không thể tải bài viết.", deleteConfirm: "Xóa “{title}”? Thao tác này không thể hoàn tác.", deleteFailed: "Không thể xóa bài viết.", linkCopied: "Đã sao chép liên kết.", importing: "Đang nhập bài viết có sẵn…", importFailed: "Nhập bài viết thất bại.", imported: "Đã nhập {count} bài viết.", view: "Xem", copyLink: "Sao chép liên kết", edit: "Sửa", delete: "Xóa", draft: "Bản nháp",
+    editPost: "Sửa bài viết", newPost: "Thêm bài viết", editorDescription: "Viết, định dạng và xuất bản bài viết.", backToPosts: "Quay lại danh sách", title: "Tiêu đề", slug: "Slug", excerpt: "Mô tả ngắn", featuredImage: "URL ảnh đại diện", imageDescription: "Mô tả hình ảnh", readTime: "Thời gian đọc", featuredHomepage: "Hiển thị nổi bật trên trang chủ", storyContent: "Nội dung bài viết", paragraph: "Đoạn văn", heading2: "Tiêu đề 2", heading3: "Tiêu đề 3", quote: "Trích dẫn", small: "Nhỏ", normal: "Bình thường", large: "Lớn", extraLarge: "Rất lớn", list: "Danh sách", image: "Hình ảnh", video: "Video", cancel: "Hủy", saving: "Đang lưu…", publishPost: "Xuất bản", saveDraft: "Lưu bản nháp", loadingEditor: "Đang tải trình soạn thảo…", postNotFound: "Không tìm thấy bài viết.", saveFailed: "Không thể lưu bài viết.",
+    resetTitle: "Đặt lại mật khẩu", resetDescription: "Tạo mật khẩu mới cho trang quản trị Porchlight.", newPassword: "Mật khẩu mới", confirmPassword: "Xác nhận mật khẩu", updatePassword: "Cập nhật mật khẩu", updating: "Đang cập nhật…", passwordMismatch: "Mật khẩu xác nhận không khớp.", resetSuccess: "Đã cập nhật mật khẩu.", resetFailed: "Không thể đặt lại mật khẩu.", continueSignIn: "Tiếp tục đăng nhập",
+    system: "Hệ thống", settingsDescription: "Cấu hình được quản lý an toàn bằng biến môi trường Cloudflare.", requiredConfiguration: "Cấu hình bắt buộc", d1Binding: "Liên kết D1", sessionSecret: "Khóa ký phiên", canonicalWebsite: "Địa chỉ website chính", secretNote: "Các khóa bí mật không hiển thị trong trình duyệt. Hãy thay đổi chúng trong Cloudflare Dashboard.",
+  },
+} as const;
+
+type TranslationKey = keyof typeof translations.en;
+const AdminLocaleContext = createContext<{ locale: AdminLocale; setLocale: (locale: AdminLocale) => void; t: (key: TranslationKey, values?: Record<string, string | number>) => string } | null>(null);
+
+export function AdminLocaleProvider({ children }: { children: React.ReactNode }) {
+  const [locale, setLocaleState] = useState<AdminLocale>("en");
+  useEffect(() => { const timer = window.setTimeout(() => { const saved = localStorage.getItem("porchlight-admin-locale"); if (saved === "vi") setLocaleState("vi"); }, 0); return () => window.clearTimeout(timer); }, []);
+  const setLocale = (next: AdminLocale) => { setLocaleState(next); localStorage.setItem("porchlight-admin-locale", next); document.documentElement.lang = next; };
+  const value = useMemo(() => ({ locale, setLocale, t: (key: TranslationKey, values?: Record<string, string | number>) => Object.entries(values || {}).reduce((text, [name, value]) => text.replace(`{${name}}`, String(value)), translations[locale][key] as string) }), [locale]);
+  return <AdminLocaleContext.Provider value={value}>{children}</AdminLocaleContext.Provider>;
+}
+
+export function useAdminLocale() { const context = useContext(AdminLocaleContext); if (!context) throw new Error("useAdminLocale must be used inside AdminLocaleProvider"); return context; }
+
+export function LanguageSwitcher() {
+  const { locale, setLocale, t } = useAdminLocale();
+  return <label className="admin-language"><span>◎ {t("language")}</span><select value={locale} onChange={(event) => setLocale(event.target.value as AdminLocale)} aria-label={t("language")}><option value="en">{t("english")}</option><option value="vi">{t("vietnamese")}</option></select></label>;
+}

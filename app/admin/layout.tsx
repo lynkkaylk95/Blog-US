@@ -1,3 +1,4 @@
 import "./admin.css";
 import "./admin-extra.css";
-export default function AdminRootLayout({ children }: { children: React.ReactNode }) { return children; }
+import { AdminLocaleProvider } from "./components/AdminLocale";
+export default function AdminRootLayout({ children }: { children: React.ReactNode }) { return <AdminLocaleProvider>{children}</AdminLocaleProvider>; }

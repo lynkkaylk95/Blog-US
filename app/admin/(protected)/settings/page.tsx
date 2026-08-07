@@ -1,3 +1,7 @@
-import type { Metadata } from "next";
-export const metadata: Metadata = { title: "Settings — Admin", robots: { index: false, follow: false } };
-export default function SettingsPage() { return <main className="admin-main"><div className="admin-page-title"><div><span>System</span><h1>Settings</h1><p>Configuration is managed securely through Cloudflare environment variables.</p></div></div><section className="admin-panel settings-list"><h2>Required configuration</h2><p><b>D1 binding:</b> DB</p><p><b>Admin password:</b> ADMIN_PASSWORD</p><p><b>Session signing secret:</b> ADMIN_SESSION_SECRET</p><p><b>Canonical website:</b> SITE_URL</p><small>Secrets are never displayed in the browser. Change them from the Cloudflare dashboard.</small></section></main>; }
+"use client";
+import { LanguageSwitcher, useAdminLocale } from "../../components/AdminLocale";
+
+export default function SettingsPage() {
+  const { t } = useAdminLocale();
+  return <main className="admin-main"><div className="admin-page-title"><div><span>{t("system")}</span><h1>{t("settings")}</h1><p>{t("settingsDescription")}</p></div></div><section className="admin-panel settings-list"><h2>{t("requiredConfiguration")}</h2><p><b>{t("d1Binding")}:</b> DB</p><p><b>{t("adminPassword")}:</b> ADMIN_PASSWORD</p><p><b>{t("sessionSecret")}:</b> ADMIN_SESSION_SECRET</p><p><b>{t("canonicalWebsite")}:</b> SITE_URL</p><p><b>{t("language")}:</b> <LanguageSwitcher /></p><small>{t("secretNote")}</small></section></main>;
+}
