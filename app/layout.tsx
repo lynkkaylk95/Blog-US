@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./content.css";
-import { siteDescription, siteName, siteUrl } from "./site";
+import { defaultGoogleAnalyticsId, siteDescription, siteName, siteUrl } from "./site";
 import { CloudflareAnalytics, GoogleAnalytics } from "./components/Analytics";
 import { CookieConsent } from "./components/CookieConsent";
 
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const configuredGoogleId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+  const configuredGoogleId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || defaultGoogleAnalyticsId;
   const configuredCloudflareToken = process.env.NEXT_PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
   const googleAnalyticsId = configuredGoogleId && /^G-[A-Z0-9]+$/i.test(configuredGoogleId) ? configuredGoogleId : undefined;
   const cloudflareToken = configuredCloudflareToken && /^[a-f0-9]{32}$/i.test(configuredCloudflareToken) ? configuredCloudflareToken : undefined;

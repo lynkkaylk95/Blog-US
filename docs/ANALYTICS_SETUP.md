@@ -5,13 +5,13 @@ Configure these environment variables in Cloudflare before the production deploy
 | Variable | Value |
 | --- | --- |
 | `SITE_URL` | The canonical origin, for example `https://example.com` |
-| `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` | The GA4 web stream measurement ID, for example `G-XXXXXXXXXX` |
+| `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` | Optional override; the website currently defaults to `G-2D0SSCEYRN` |
 | `GOOGLE_SITE_VERIFICATION` | Only the `content` value from Google's verification meta tag |
 | `NEXT_PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN` | The site token from Cloudflare Web Analytics |
 
 ## Google Analytics
 
-Create a GA4 property and web data stream, then copy its Measurement ID. The site uses basic consent mode: no Google script or request is made before a visitor allows optional analytics. Advertising storage and personalization remain denied.
+The current GA4 Measurement ID is `G-2D0SSCEYRN`. The site uses basic consent mode: no Google script or request is made before a visitor allows optional analytics. Advertising storage and personalization remain denied. Set `NEXT_PUBLIC_GOOGLE_ANALYTICS_ID` only when you need to override this property.
 
 ## Google Search Console
 
