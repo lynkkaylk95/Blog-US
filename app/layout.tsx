@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: { default: "Porchlight Stories — Stories Worth Slowing Down For", template: "%s | Porchlight Stories" },
   description: siteDescription,
   applicationName: siteName,
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png" }],
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
   verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   alternates: { canonical: "/", types: { "application/rss+xml": [{ url: "/feed.xml", title: "Porchlight Stories RSS" }] } },
   openGraph: {
