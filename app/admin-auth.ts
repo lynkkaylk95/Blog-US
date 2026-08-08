@@ -23,11 +23,15 @@ export async function createAdminToken() {
 }
 
 export async function isAdminAuthenticated() {
-  const token = (await cookies()).get(cookieName)?.value;
-  if (!token) return false;
-  const [expires, suppliedSignature] = token.split(".");
-  if (!expires || !suppliedSignature || Number(expires) < Date.now()) return false;
-  return suppliedSignature === await signature(expires);
+  try {
+    const token = (await cookies()).get(cookieName)?.value;
+    if (!token) return false;
+    const [expires, suppliedSignature] = token.split(".");
+    if (!expires || !suppliedSignature || Number(expires) < Date.now()) return false;
+    return suppliedSignature === await signature(expires);
+  } catch {
+    return false;
+  }
 }
 
 export function adminCookieOptions() {

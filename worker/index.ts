@@ -82,7 +82,17 @@ const worker = {
       }, allowedWidths);
     }
 
-    return handler.fetch(request, env, ctx);
+    try {
+      return await handler.fetch(request, env, ctx);
+    } catch (error) {
+      console.error("Application request failed", error);
+      if (url.pathname.startsWith("/admin")) {
+        const headers = new Headers({ location: new URL("/admin/login?session=expired", url).toString() });
+        headers.append("set-cookie", "porchlight_admin=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict");
+        return new Response(null, { status: 307, headers });
+      }
+      return new Response("The application could not complete this request.", { status: 500 });
+    }
   },
 };
 
