@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminCookieOptions, cookieName, createAdminToken, hasValidMutationOrigin, passwordsMatch } from "../../../admin-auth";
 import { runtimeEnv } from "../../../runtime-env";
-import { verifyAdminUser, verifyStoredAdminPassword } from "../../../../db/admin-credentials";
+import { setStoredAdminPassword, verifyAdminUser, verifyStoredAdminPassword } from "../../../../db/admin-credentials";
 
 export async function POST(request: Request) {
   if (!await hasValidMutationOrigin()) return NextResponse.json({ message: "Invalid request origin." }, { status: 403 });
@@ -12,8 +12,9 @@ export async function POST(request: Request) {
   const userMatch = email ? await verifyAdminUser(email, body.password).catch(() => false) : false;
   const storedMatch = email ? false : await verifyStoredAdminPassword(body.password).catch(() => null);
   const initialMatch = expected ? passwordsMatch(body.password, expected) : false;
-  if (email ? !userMatch : (storedMatch === false || (storedMatch === null && !initialMatch))) return NextResponse.json({ message: "Incorrect email or password." }, { status: 401 });
+  if (email ? !userMatch : !storedMatch && !initialMatch) return NextResponse.json({ message: "Incorrect email or password." }, { status: 401 });
   if (!runtimeEnv("ADMIN_SESSION_SECRET")) return NextResponse.json({ message: "Admin session signing is not configured." }, { status: 503 });
+  if (!email && initialMatch && storedMatch !== true) await setStoredAdminPassword(body.password).catch(() => undefined);
   const response = NextResponse.json({ ok: true });
   response.cookies.set(cookieName, await createAdminToken(), adminCookieOptions());
   return response;

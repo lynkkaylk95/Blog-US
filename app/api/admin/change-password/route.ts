@@ -20,7 +20,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
   const stored = await verifyStoredAdminPassword(current).catch(() => null); const initial = runtimeEnv("ADMIN_PASSWORD");
-  if (stored === false || (stored === null && (!initial || !passwordsMatch(current, initial)))) return NextResponse.json({ message: "Current password is incorrect." }, { status: 401 });
+  const initialMatch = initial ? passwordsMatch(current, initial) : false;
+  if (!stored && !initialMatch) return NextResponse.json({ message: "Current password is incorrect." }, { status: 401 });
   await getDb().insert(adminCredentials).values({ id: 1, ...derived, updatedAt: now }).onConflictDoUpdate({ target: adminCredentials.id, set: { ...derived, updatedAt: now } });
   return NextResponse.json({ ok: true });
 }
