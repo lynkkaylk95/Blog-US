@@ -5,6 +5,7 @@ interface Env {
   ADMIN_PASSWORD?: string;
   ADMIN_SESSION_SECRET?: string;
   PASSWORD_RESET_EMAIL?: SendEmail;
+  MEDIA: R2Bucket;
   SITE_URL?: string;
 }
 
