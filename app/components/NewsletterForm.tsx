@@ -31,7 +31,7 @@ export function NewsletterForm() {
 
       form.reset();
       setState("success");
-      setMessage("You’re on the list. Please check your inbox to confirm.");
+      setMessage(result.message || "Thank you for joining Porchlight Stories.");
     } catch (error) {
       setState("error");
       setMessage(error instanceof Error ? error.message : "Please try again later.");
@@ -49,7 +49,7 @@ export function NewsletterForm() {
       <button type="submit" disabled={state === "submitting"}>
         {state === "submitting" ? "Joining…" : "Join the porch"}
       </button>
-      <small>No noise. Just one good story a week. Unsubscribe anytime.</small>
+      <small>By joining, you agree to receive our weekly story. Unsubscribe anytime.</small>
       <p className={`form-message form-message--${state}`} role="status" aria-live="polite">{message}</p>
     </form>
   );

@@ -25,5 +25,5 @@ export async function POST(request: Request) {
   if (!response.ok) {
     return NextResponse.json({ message: "We could not add you right now. Please try again later." }, { status: 502 });
   }
-  return NextResponse.json({ message: "Please check your inbox to confirm." });
+  return NextResponse.json({ message: "Thank you for joining Porchlight Stories." });
 }
