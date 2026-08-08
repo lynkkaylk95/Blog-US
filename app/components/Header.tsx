@@ -13,6 +13,7 @@ export function Header() {
           <Link href="/#latest">Latest</Link>
           <Link href="/category/family-legacy">Family</Link>
           <Link href="/category/second-chances">Second Chances</Link>
+          <Link href="/category/series">Series</Link>
           <Link href="/#popular">Most Read</Link>
         </nav>
         <Link href="/#newsletter" className="header-button">Join free <span>→</span></Link>

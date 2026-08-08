@@ -13,6 +13,7 @@ import { absoluteUrl, siteName } from "../../site";
 import { RichStory } from "./RichStory";
 import { ViewTracker } from "./ViewTracker";
 import { authorInitials, authorSlug } from "../../author-utils";
+import { PartNavigator } from "./PartNavigator";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -59,6 +60,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
   }
 
   const allStories = await getPublishedStories();
+  const seriesParts = story.seriesTitle ? allStories.filter((item) => item.seriesTitle === story.seriesTitle && item.partNumber).sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((item) => ({ slug: item.slug, title: item.title, partNumber: item.partNumber as number })) : [];
   const sameAuthorStories = allStories.filter((item) => item.slug !== story.slug && item.author.toLowerCase() === story.author.toLowerCase()).slice(0, 3);
   const relatedStories = allStories.filter((item) => item.slug !== story.slug && item.author.toLowerCase() !== story.author.toLowerCase()).slice(0, 3);
   const articleJsonLd = {
@@ -80,13 +82,14 @@ export default async function StoryPage({ params }: StoryPageProps) {
     <Header />
     <article className="article-hero shell">
       <div className="breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href={`/category/${categorySlugs[story.category]}`}>{story.category}</Link></div>
-      <span className="eyebrow">{story.category}</span>
+      <span className="eyebrow">{story.seriesTitle ? `${story.seriesTitle} · Part ${story.partNumber} of ${seriesParts.length}` : story.category}</span>
       <h1>{story.title}</h1>
       <div className="article-byline"><div className="author-avatar">{authorInitials(story.author)}</div><div><b>By <Link href={`/author/${authorSlug(story.author)}`}>{story.author}</Link></b><span>{story.date} · {story.readTime} · <ViewTracker slug={story.slug} initialViews={story.views} /></span>{story.updatedDate !== story.date && <span>Updated {story.updatedDate}</span>}</div><ShareButtons title={story.title} /></div>
     </article>
     <div className="article-image"><Image src={story.image} alt={story.title} fill priority unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) 100vw, 1100px" /></div>
     <div className="shell"><AdSlot /></div>
     {story.contentHtml ? <RichStory html={story.contentHtml} /> : <Reader chapters={story.chapters} />}
+    {story.seriesTitle && seriesParts.length > 0 && <PartNavigator seriesTitle={story.seriesTitle} parts={seriesParts} currentSlug={story.slug} />}
     {sameAuthorStories.length > 0 && <section className="more-stories author-stories shell"><div className="section-heading"><div><span className="eyebrow">More from this author</span><h2>More stories by {story.author}</h2></div><Link href={`/author/${authorSlug(story.author)}`}>View all →</Link></div><div className="popular-grid">{sameAuthorStories.map((item) => <StoryCard key={item.slug} story={item} />)}</div></section>}
     <section className="more-stories shell"><div className="section-heading"><div><span className="eyebrow">Keep reading</span><h2>More stories for you</h2></div></div><div className="popular-grid">{relatedStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section>
     <footer className="article-footer"><Link href="/">← Back to Porchlight Stories</Link><span>© 2026 Porchlight Stories</span></footer>

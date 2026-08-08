@@ -4,6 +4,7 @@ import { categorySlugs } from "../../content";
 export type PostInput = {
   slug: string; title: string; excerpt: string; category: string; imageUrl: string; imageAlt: string;
   contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean;
+  seriesTitle: string | null; partNumber: number | null;
 };
 
 export function validatePostInput(value: unknown): { data?: PostInput; message?: string } {
@@ -14,6 +15,11 @@ export function validatePostInput(value: unknown): { data?: PostInput; message?:
   const slug = String(input.slug).trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return { message: "Slug must use lowercase letters, numbers, and hyphens." };
   if (!(String(input.category) in categorySlugs)) return { message: "Unsupported category." };
+  const isSeries = String(input.category) === "Series";
+  const seriesTitle = typeof input.seriesTitle === "string" ? input.seriesTitle.trim() : "";
+  const partNumber = Number(input.partNumber);
+  if (isSeries && !seriesTitle) return { message: "Series title is required for a series post." };
+  if (isSeries && (!Number.isInteger(partNumber) || partNumber < 1)) return { message: "Part number must be a positive whole number." };
   try { new URL(String(input.imageUrl)); } catch { return { message: "Image URL is invalid." }; }
   const minutes = Number.parseInt(String(input.readTime), 10);
   if (!Number.isInteger(minutes) || minutes < 1) return { message: "Read time must be a positive number of minutes." };
@@ -26,5 +32,5 @@ export function validatePostInput(value: unknown): { data?: PostInput; message?:
     transformTags: { a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }, true), iframe: sanitizeHtml.simpleTransform("iframe", { loading: "lazy" }, true) },
   });
   if (!sanitizeHtml(contentHtml, { allowedTags: [] }).trim()) return { message: "Post content is empty." };
-  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: String(input.category), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true } };
+  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: String(input.category), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true, seriesTitle: isSeries ? seriesTitle : null, partNumber: isSeries ? partNumber : null } };
 }

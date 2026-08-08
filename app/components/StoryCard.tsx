@@ -11,7 +11,7 @@ export function StoryCard({ story, rank }: { story: Story; rank?: number }) {
         <Image className="story-image" src={story.image} alt={story.title} fill unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 900px) 50vw, 380px" />
       </Link>
       <div className="story-copy">
-        <span className="eyebrow">{story.category}</span>
+        <span className="eyebrow">{story.seriesTitle ? `${story.seriesTitle} · Part ${story.partNumber}` : story.category}</span>
         <h3><Link href={`/story/${story.slug}`}>{story.title}</Link></h3>
         <div className="story-author">By <Link href={`/author/${authorSlug(story.author)}`}>{story.author}</Link></div>
         <div className="story-meta"><span>{story.readTime}</span><span>•</span><span>{story.date}</span></div>

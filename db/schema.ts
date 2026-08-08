@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const posts = sqliteTable("posts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -6,6 +6,8 @@ export const posts = sqliteTable("posts", {
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull(),
   category: text("category").notNull(),
+  seriesTitle: text("series_title"),
+  partNumber: integer("part_number"),
   imageUrl: text("image_url").notNull(),
   imageAlt: text("image_alt").notNull(),
   contentHtml: text("content_html").notNull(),
@@ -17,7 +19,10 @@ export const posts = sqliteTable("posts", {
   publishedAt: text("published_at"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
-});
+}, (table) => [
+  index("idx_posts_series_title").on(table.seriesTitle),
+  uniqueIndex("idx_posts_series_part").on(table.seriesTitle, table.partNumber),
+]);
 
 export const adminCredentials = sqliteTable("admin_credentials", {
   id: integer("id").primaryKey(),

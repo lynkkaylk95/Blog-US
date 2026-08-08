@@ -3,6 +3,8 @@ export type Chapter = { title: string; paragraphs: string[] };
 export type Story = {
   slug: string;
   category: string;
+  seriesTitle?: string | null;
+  partNumber?: number | null;
   title: string;
   excerpt: string;
   image: string;
@@ -22,7 +24,7 @@ export type Story = {
 
 export const categorySlugs: Record<string, string> = {
   "Family & Legacy": "family-legacy", "Second Chances": "second-chances", "Life Stories": "life-stories",
-  "Justice & Truth": "justice-truth", "Love After 50": "love-after-50", Grandparents: "grandparents",
+  "Justice & Truth": "justice-truth", "Love After 50": "love-after-50", Grandparents: "grandparents", Series: "series",
 };
 
 const modules = import.meta.glob("../content/stories/*.md", {
@@ -78,7 +80,7 @@ function parseStory(source: string, file: string): Story {
   return {
     slug: String(values.slug), category: String(values.category), title: String(values.title), excerpt: String(values.excerpt),
     image: String(values.image), imageAlt: String(values.imageAlt), readTime: String(values.readTime), publishedAt,
-    updatedAt, status: values.status, featured: values.featured === true, author: "Porchlight Editors", views: 0,
+    updatedAt, status: values.status, featured: values.featured === true, author: "Porchlight Editors", views: 0, seriesTitle: null, partNumber: null,
     chapters: parseChapters(body, file),
     date: formatDate(publishedAt), updatedDate: formatDate(updatedAt),
   };
