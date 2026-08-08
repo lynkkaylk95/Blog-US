@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { runtimeEnv } from "../../runtime-env";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "You’re on the list." });
   }
 
-  const endpoint = process.env.NEWSLETTER_WEBHOOK_URL;
+  const endpoint = runtimeEnv("NEWSLETTER_WEBHOOK_URL");
   if (!endpoint) {
     return NextResponse.json({ message: "Newsletter signup is being connected. Please try again soon." }, { status: 503 });
   }
