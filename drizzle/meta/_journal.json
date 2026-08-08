@@ -15,6 +15,13 @@
       "when": 1786110000000,
       "tag": "0001_admin_password_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786158000000,
+      "tag": "0002_post_views",
+      "breakpoints": true
     }
   ]
 }

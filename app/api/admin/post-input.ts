@@ -3,13 +3,13 @@ import { categorySlugs } from "../../content";
 
 export type PostInput = {
   slug: string; title: string; excerpt: string; category: string; imageUrl: string; imageAlt: string;
-  contentHtml: string; readTime: string; status: "draft" | "published"; featured: boolean;
+  contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean;
 };
 
 export function validatePostInput(value: unknown): { data?: PostInput; message?: string } {
   if (!value || typeof value !== "object") return { message: "Invalid post data." };
   const input = value as Record<string, unknown>;
-  const stringFields = ["slug", "title", "category", "imageUrl", "contentHtml", "readTime"] as const;
+  const stringFields = ["slug", "title", "category", "imageUrl", "contentHtml", "readTime", "author"] as const;
   for (const field of stringFields) if (typeof input[field] !== "string" || !input[field].trim()) return { message: `${field} is required.` };
   const slug = String(input.slug).trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return { message: "Slug must use lowercase letters, numbers, and hyphens." };
@@ -26,5 +26,5 @@ export function validatePostInput(value: unknown): { data?: PostInput; message?:
     transformTags: { a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }, true), iframe: sanitizeHtml.simpleTransform("iframe", { loading: "lazy" }, true) },
   });
   if (!sanitizeHtml(contentHtml, { allowedTags: [] }).trim()) return { message: "Post content is empty." };
-  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: String(input.category), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, status, featured: input.featured === true } };
+  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: String(input.category), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true } };
 }

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { categorySlugs } from "./content";
 import { getPublishedStories } from "./posts-data";
 import { absoluteUrl } from "./site";
+import { authorSlug } from "./author-utils";
 
 export const revalidate = 0;
 
@@ -28,5 +29,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: story.featured ? 0.9 : 0.8,
     images: [story.image],
   }));
-  return [...pages, ...categoryPages, ...storyPages];
+  const authorPages: MetadataRoute.Sitemap = [...new Set(stories.map((story) => story.author))].map((author) => ({
+    url: absoluteUrl(`/author/${authorSlug(author)}`),
+    lastModified: latestStoryDate,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+  return [...pages, ...categoryPages, ...authorPages, ...storyPages];
 }

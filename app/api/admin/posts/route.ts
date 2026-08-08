@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   try {
     const deleted = await findPostBySlug(result.data.slug);
     if (deleted && deleted.status !== "deleted") return NextResponse.json({ message: "This slug already exists." }, { status: 409 });
-    const values = { ...result.data, author: "Admin", createdAt: now, updatedAt: now, publishedAt: result.data.status === "published" ? now : null };
+    const values = { ...result.data, createdAt: now, updatedAt: now, publishedAt: result.data.status === "published" ? now : null };
     const post = deleted ? await updatePost(deleted.id, values) : await createPost(values);
     return NextResponse.json({ post }, { status: 201 });
   } catch (error) {

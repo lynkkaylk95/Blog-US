@@ -16,6 +16,8 @@ export type Story = {
   date: string;
   updatedDate: string;
   contentHtml?: string;
+  author: string;
+  views: number;
 };
 
 export const categorySlugs: Record<string, string> = {
@@ -76,7 +78,7 @@ function parseStory(source: string, file: string): Story {
   return {
     slug: String(values.slug), category: String(values.category), title: String(values.title), excerpt: String(values.excerpt),
     image: String(values.image), imageAlt: String(values.imageAlt), readTime: String(values.readTime), publishedAt,
-    updatedAt, status: values.status, featured: values.featured === true,
+    updatedAt, status: values.status, featured: values.featured === true, author: "Porchlight Editors", views: 0,
     chapters: parseChapters(body, file),
     date: formatDate(publishedAt), updatedDate: formatDate(updatedAt),
   };

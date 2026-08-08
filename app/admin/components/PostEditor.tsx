@@ -7,8 +7,8 @@ import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
 
 const categories = ["Family & Legacy", "Second Chances", "Life Stories", "Justice & Truth", "Love After 50", "Grandparents"];
-type EditorPost = { slug: string; title: string; excerpt: string; category: string; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; status: "draft" | "published"; featured: boolean };
-const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0], imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", status: "draft", featured: false };
+type EditorPost = { slug: string; title: string; excerpt: string; category: string; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
+const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0], imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "draft", featured: false };
 
 function createSlug(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -71,6 +71,7 @@ export function PostEditor({ postId }: { postId?: number }) {
         <div className="field field--wide"><label>{t("title")} *</label><input value={post.title} onChange={(event) => titleChanged(event.target.value)} required /></div>
         <div className="field"><label>{t("slug")} *</label><input value={post.slug} readOnly required /></div>
         <div className="field"><label>{t("category")}</label><select value={post.category} onChange={(event) => set("category", event.target.value)}>{categories.map((category) => <option key={category}>{category}</option>)}</select></div>
+        <div className="field"><label>{t("author")} *</label><input value={post.author} onChange={(event) => set("author", event.target.value)} required maxLength={120} /></div>
         <div className="field"><label>{t("featuredImage")} *</label><div className="media-url-field"><input type="url" value={post.imageUrl} onChange={(event) => set("imageUrl", event.target.value)} required /><button type="button" disabled={uploading} onClick={() => featuredUpload.current?.click()}><AdminIcon name="upload" />{uploading ? t("uploading") : t("chooseLocalImage")}</button><input ref={featuredUpload} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLocal(file, "featured"); event.target.value = ""; }} /></div>{post.imageUrl && <div className="featured-image-preview"><img src={post.imageUrl} alt={post.imageAlt || "Featured image preview"} /></div>}</div>
         <div className="field"><label>{t("readTime")}</label><input type="number" min="1" step="1" inputMode="numeric" value={post.readTime} onChange={(event) => set("readTime", event.target.value)} required /></div>
         <div className="field"><label>{t("status")}</label><select value={post.status} onChange={(event) => set("status", event.target.value as EditorPost["status"])}><option value="draft">{t("draft")}</option><option value="published">{t("published")}</option></select></div>
