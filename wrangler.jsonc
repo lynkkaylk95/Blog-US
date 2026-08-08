@@ -3,6 +3,8 @@
   "name": "porchlight-stories",
   "main": "worker/index.ts",
   "compatibility_date": "2026-05-22",
+  "keep_vars": true,
+  "workers_dev": true,
   "routes": [
     {
       "pattern": "blogus.cinemaxmx.com",
