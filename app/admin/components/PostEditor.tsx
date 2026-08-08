@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { Editor } from "@tinymce/tinymce-react";
 import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
 
@@ -15,44 +16,46 @@ function createSlug(value: string) {
 
 function readTimeMinutes(value: string) { return value.match(/\d+/)?.[0] || ""; }
 
+type TinyEditorInstance = {
+  getContent(): string;
+  insertContent(html: string): void;
+  uploadImages(): Promise<unknown>;
+};
+
 export function PostEditor({ postId }: { postId?: number }) {
   const { t } = useAdminLocale();
   const [post, setPost] = useState<EditorPost>(emptyPost);
   const [loading, setLoading] = useState(Boolean(postId)); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [message, setMessage] = useState("");
-  const editor = useRef<HTMLDivElement>(null); const savedRange = useRef<Range | null>(null); const editorInitialized = useRef(false);
-  const featuredUpload = useRef<HTMLInputElement>(null); const imageUpload = useRef<HTMLInputElement>(null); const videoUpload = useRef<HTMLInputElement>(null);
+  const editor = useRef<TinyEditorInstance | null>(null);
+  const featuredUpload = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (!postId) return; void fetch(`/api/admin/posts/${postId}`).then(async (response) => { const result = await response.json() as { post?: EditorPost; message?: string }; if (response.status === 401) return void (window.location.href = "/admin/login"); if (result.post) setPost({ ...result.post, readTime: readTimeMinutes(result.post.readTime) }); else setMessage(result.message || t("postNotFound")); setLoading(false); }); }, [postId, t]);
-  useEffect(() => {
-    if (loading || !editor.current || editorInitialized.current) return;
-    editor.current.innerHTML = post.contentHtml || "<p><br></p>";
-    editorInitialized.current = true;
-  }, [loading, post.contentHtml]);
   function set<K extends keyof EditorPost>(key: K, value: EditorPost[K]) { setPost((current) => ({ ...current, [key]: value })); }
   function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: createSlug(title) })); }
-  function rememberSelection() { const selection = window.getSelection(); if (selection?.rangeCount && editor.current?.contains(selection.anchorNode)) savedRange.current = selection.getRangeAt(0).cloneRange(); }
-  function syncEditor() { if (editor.current) set("contentHtml", editor.current.innerHTML); rememberSelection(); }
-  function command(name: string, value?: string) { editor.current?.focus(); document.execCommand(name, false, value); syncEditor(); }
-  function insertEditorHtml(html: string) {
-    const root = editor.current; if (!root) return; root.focus(); const selection = window.getSelection(); const range = savedRange.current;
-    if (selection && range && root.contains(range.commonAncestorContainer)) { selection.removeAllRanges(); selection.addRange(range); range.deleteContents(); const fragment = range.createContextualFragment(html); const last = fragment.lastChild; range.insertNode(fragment); if (last) { range.setStartAfter(last); range.collapse(true); selection.removeAllRanges(); selection.addRange(range); } }
-    else root.insertAdjacentHTML("beforeend", html);
-    syncEditor();
+  async function uploadFile(file: Blob, progress?: (percent: number) => void) {
+    const data = new FormData(); data.set("file", file); progress?.(10);
+    const response = await fetch("/api/admin/upload", { method: "POST", body: data });
+    if (response.status === 401) { window.location.href = "/admin/login"; throw new Error("Unauthorized"); }
+    const result = await response.json() as { url?: string; message?: string };
+    if (!response.ok || !result.url) throw new Error(result.message || t("uploadFailed"));
+    progress?.(100);
+    return new URL(result.url, window.location.origin).toString();
   }
   async function uploadLocal(file: File, target: "featured" | "image" | "video") {
-    setUploading(true); setMessage(""); const data = new FormData(); data.set("file", file);
+    setUploading(true); setMessage("");
     try {
-      const response = await fetch("/api/admin/upload", { method: "POST", body: data }); const result = await response.json() as { url?: string; message?: string };
-      if (!response.ok || !result.url) return setMessage(result.message || t("uploadFailed"));
-      const mediaUrl = new URL(result.url, window.location.origin).toString();
+      const mediaUrl = await uploadFile(file);
       if (target === "featured") set("imageUrl", mediaUrl);
-      else if (target === "image") insertEditorHtml(`<figure><img src="${mediaUrl}" alt=""><figcaption></figcaption></figure><p><br></p>`);
-      else insertEditorHtml(`<video src="${mediaUrl}" controls preload="metadata"></video><p><br></p>`);
-    } catch { setMessage(t("uploadFailed")); }
+      else if (target === "image") editor.current?.insertContent(`<figure><img src="${mediaUrl}" alt=""><figcaption></figcaption></figure><p></p>`);
+      else editor.current?.insertContent(`<video src="${mediaUrl}" controls preload="metadata"></video><p></p>`);
+    } catch (error) { setMessage(error instanceof Error ? error.message : t("uploadFailed")); }
     finally { setUploading(false); }
   }
   async function submit(event: FormEvent) {
-    event.preventDefault(); syncEditor(); setSaving(true); setMessage(""); const current = { ...post, contentHtml: editor.current?.innerHTML || post.contentHtml };
+    event.preventDefault(); setSaving(true); setMessage("");
+    try { await editor.current?.uploadImages(); }
+    catch (error) { setMessage(error instanceof Error ? error.message : t("uploadFailed")); setSaving(false); return; }
+    const current = { ...post, contentHtml: editor.current?.getContent() || post.contentHtml };
     const response = await fetch(postId ? `/api/admin/posts/${postId}` : "/api/admin/posts", { method: postId ? "PUT" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(current) }); const result = await response.json() as { message?: string };
     if (response.ok) window.location.href = "/admin"; else { setMessage(result.message || t("saveFailed")); setSaving(false); }
   }
@@ -71,18 +74,43 @@ export function PostEditor({ postId }: { postId?: number }) {
         <label className="admin-check"><input type="checkbox" checked={post.featured} onChange={(event) => set("featured", event.target.checked)} /> {t("featuredHomepage")}</label>
       </section>
       <section className="admin-panel rich-panel"><div className="rich-label">{t("storyContent")} *</div>
-        <div className="rich-toolbar">
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => command("undo")}>↶</button><button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => command("redo")}>↷</button>
-          <select onChange={(event) => command("formatBlock", event.target.value)} defaultValue="p"><option value="p">{t("paragraph")}</option><option value="h2">{t("heading2")}</option><option value="h3">{t("heading3")}</option><option value="blockquote">{t("quote")}</option></select>
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => command("bold")}><b>B</b></button><button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => command("italic")}><i>I</i></button><button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => command("underline")}><u>U</u></button>
-          <select title="Font" onChange={(event) => command("fontName", event.target.value)} defaultValue="Georgia"><option>Georgia</option><option>Arial</option><option>Verdana</option><option>Times New Roman</option></select><select title="Text size" onChange={(event) => command("fontSize", event.target.value)} defaultValue="3"><option value="2">{t("small")}</option><option value="3">{t("normal")}</option><option value="5">{t("large")}</option><option value="7">{t("extraLarge")}</option></select>
-          <label className="color-tool" title="Text color">A<input type="color" onChange={(event) => command("foreColor", event.target.value)} /></label><label className="color-tool" title="Background color">▨<input type="color" onChange={(event) => command("hiliteColor", event.target.value)} /></label>
-          <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => command("insertUnorderedList")}><AdminIcon name="list" />{t("list")}</button>
-          <button type="button" disabled={uploading} onMouseDown={() => rememberSelection()} onClick={() => imageUpload.current?.click()}><AdminIcon name="image" />{t("uploadImage")}</button><input ref={imageUpload} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLocal(file, "image"); event.target.value = ""; }} />
-          <button type="button" disabled={uploading} onMouseDown={() => rememberSelection()} onClick={() => videoUpload.current?.click()}><AdminIcon name="video" />{t("uploadVideo")}</button><input ref={videoUpload} type="file" accept="video/mp4,video/webm,video/quicktime" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLocal(file, "video"); event.target.value = ""; }} />
-          <button type="button" title="Link" onMouseDown={(event) => event.preventDefault()} onClick={() => { const url = prompt("Link URL:"); if (url) command("createLink", url); }}><AdminIcon name="link" /></button>
-        </div>{uploading && <div className="upload-progress" role="status">{t("uploading")}</div>}
-        <div ref={editor} className="rich-editor" contentEditable suppressContentEditableWarning onInput={syncEditor} onKeyUp={rememberSelection} onMouseUp={rememberSelection} onBlur={rememberSelection} />
+        {uploading && <div className="upload-progress" role="status">{t("uploading")}</div>}
+        <Editor
+          apiKey={import.meta.env.VITE_TINYMCE_API_KEY || "no-api-key"}
+          onInit={(_, instance) => { editor.current = instance as TinyEditorInstance; }}
+          initialValue={post.contentHtml || "<p></p>"}
+          onEditorChange={(content) => set("contentHtml", content)}
+          init={{
+            height: 650,
+            menubar: "file edit view insert format tools table help",
+            plugins: "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount",
+            toolbar: "undo redo | blocks | fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | link image media table | blockquote removeformat | code fullscreen preview",
+            toolbar_mode: "wrap",
+            block_formats: "Paragraph=p;Heading 2=h2;Heading 3=h3;Heading 4=h4;Quote=blockquote",
+            font_family_formats: "Georgia=Georgia,serif;Arial=Arial,sans-serif;Verdana=Verdana,sans-serif;Times New Roman='Times New Roman',serif",
+            font_size_formats: "12px 14px 16px 18px 20px 24px 28px 32px",
+            content_style: "body{font-family:Georgia,serif;font-size:18px;line-height:1.75;max-width:760px;margin:24px auto;padding:0 24px}img,video{max-width:100%;height:auto}h2{font-size:30px}h3{font-size:25px}h4{font-size:21px}",
+            automatic_uploads: true,
+            paste_data_images: true,
+            images_reuse_filename: false,
+            images_upload_handler: (blobInfo, progress) => uploadFile(blobInfo.blob(), progress),
+            file_picker_types: "image media",
+            file_picker_callback: (callback, _value, meta) => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = meta.filetype === "media" ? "video/mp4,video/webm,video/quicktime" : "image/jpeg,image/png,image/webp,image/gif,image/avif";
+              input.onchange = () => { const file = input.files?.[0]; if (file) void uploadFile(file).then((url) => callback(url, { title: file.name })).catch((error) => setMessage(error instanceof Error ? error.message : t("uploadFailed"))); };
+              input.click();
+            },
+            media_live_embeds: true,
+            convert_unsafe_embeds: true,
+            object_resizing: "img,video",
+            relative_urls: false,
+            remove_script_host: false,
+            promotion: false,
+            branding: false,
+          }}
+        />
       </section>
       {message && <div className="admin-error" role="alert">{message}</div>}<div className="editor-actions"><Link href="/admin">{t("cancel")}</Link><button className="admin-primary" disabled={saving || uploading}>{saving ? t("saving") : post.status === "published" ? t("publishPost") : t("saveDraft")}</button></div>
     </form>

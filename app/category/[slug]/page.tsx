@@ -5,6 +5,9 @@ import { SiteFooter } from "../../components/SiteFooter";
 import { StoryCard } from "../../components/StoryCard";
 import { getPublishedStories } from "../../posts-data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const categories: Record<string, string> = {
   "family-legacy": "Family & Legacy",
   "second-chances": "Second Chances",

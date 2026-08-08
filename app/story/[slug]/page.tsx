@@ -12,6 +12,9 @@ import { ShareButtons } from "../../components/ShareButtons";
 import { absoluteUrl, siteName } from "../../site";
 import { RichStory } from "./RichStory";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type StoryPageProps = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
@@ -77,7 +80,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
       <h1>{story.title}</h1>
       <div className="article-byline"><div className="author-avatar">PS</div><div><b>By Porchlight Editors</b><span>{story.date} · {story.readTime}</span>{story.updatedDate !== story.date && <span>Updated {story.updatedDate}</span>}</div><ShareButtons title={story.title} /></div>
     </article>
-    <div className="article-image"><Image src={story.image} alt={story.title} fill priority sizes="(max-width: 620px) 100vw, 1100px" /></div>
+    <div className="article-image"><Image src={story.image} alt={story.title} fill priority unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) 100vw, 1100px" /></div>
     <div className="shell"><AdSlot /></div>
     {story.contentHtml ? <RichStory html={story.contentHtml} /> : <Reader chapters={story.chapters} />}
     <section className="more-stories shell"><div className="section-heading"><div><span className="eyebrow">Keep reading</span><h2>More stories for you</h2></div></div><div className="popular-grid">{relatedStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section>

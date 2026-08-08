@@ -7,7 +7,7 @@ export function StoryCard({ story, rank }: { story: Story; rank?: number }) {
     <article className={`story-card ${rank ? "story-card--ranked" : ""}`}>
       <Link href={`/story/${story.slug}`} className="story-image-wrap">
         {rank && <span className="rank">{rank}</span>}
-        <Image className="story-image" src={story.image} alt={story.title} fill sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 900px) 50vw, 380px" />
+        <Image className="story-image" src={story.image} alt={story.title} fill unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 900px) 50vw, 380px" />
       </Link>
       <div className="story-copy">
         <span className="eyebrow">{story.category}</span>

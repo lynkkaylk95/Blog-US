@@ -3,6 +3,8 @@ import { categorySlugs } from "./content";
 import { getPublishedStories } from "./posts-data";
 import { absoluteUrl } from "./site";
 
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const stories = await getPublishedStories();
   const latestStoryDate = new Date(Math.max(...stories.map((story) => Date.parse(story.updatedAt))));

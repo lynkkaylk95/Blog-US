@@ -10,14 +10,18 @@ function fromDatabase(post: PostRecord): Story {
 export async function getPublishedStories() {
   try {
     const records = await listPostRecords();
-    const databaseStories = records.filter((post) => post.status === "published").map(fromDatabase);
-    const databaseSlugs = new Set(records.map((story) => story.slug));
-    return [...databaseStories, ...markdownStories.filter((story) => !databaseSlugs.has(story.slug))].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+    if (records.length) return records.filter((post) => post.status === "published").map(fromDatabase).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
+    return markdownStories;
   } catch { return markdownStories; }
 }
 
 export async function getPublishedStory(slug: string) {
-  try { const post = await findPostBySlug(slug); if (post?.status === "published") return fromDatabase(post); if (post) return null; }
+  try {
+    const post = await findPostBySlug(slug);
+    if (post?.status === "published") return fromDatabase(post);
+    if (post) return null;
+    if ((await listPostRecords()).length) return null;
+  }
   catch { /* Fall back to bundled Markdown when D1 is not configured. */ }
   return markdownStories.find((story) => story.slug === slug) ?? null;
 }

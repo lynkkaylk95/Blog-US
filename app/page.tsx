@@ -7,6 +7,9 @@ import { NewsletterForm } from "./components/NewsletterForm";
 import { SiteFooter } from "./components/SiteFooter";
 import { getPublishedStories } from "./posts-data";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home() {
   const stories = await getPublishedStories();
   const featured = stories.find((story) => story.featured) ?? stories[0];
@@ -14,7 +17,7 @@ export default async function Home() {
     <main>
       <Header />
       <section className="hero shell">
-        <div className="hero-image"><Image src={featured.image} alt={featured.title} fill priority sizes="(max-width: 900px) 100vw, 58vw" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
+        <div className="hero-image"><Image src={featured.image} alt={featured.title} fill priority unoptimized={featured.image.includes("/media/")} sizes="(max-width: 900px) 100vw, 58vw" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
         <div className="hero-copy">
           <span className="eyebrow">{featured.category}</span>
           <h1>{featured.title}</h1>

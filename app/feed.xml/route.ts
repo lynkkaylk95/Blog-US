@@ -1,6 +1,9 @@
 import { getPublishedStories } from "../posts-data";
 import { absoluteUrl, siteDescription, siteName } from "../site";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function escapeXml(value: string) {
   return value.replace(/[<>&'\"]/g, (character) => ({
     "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;",
