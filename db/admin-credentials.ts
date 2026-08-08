@@ -22,7 +22,7 @@ async function deriveLegacyPassword(password: string, salt: string) {
   return base64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(`${salt}:${password}`))));
 }
 
-const passwordIterations = 210_000;
+const passwordIterations = 100_000;
 
 async function derivePassword(password: string, salt: string, iterations = passwordIterations) {
   const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);

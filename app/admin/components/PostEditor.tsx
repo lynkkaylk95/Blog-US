@@ -6,7 +6,7 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
 
-const categories = ["Family & Legacy", "Second Chances", "Life Stories", "Justice & Truth", "Love After 50", "Grandparents", "Series"];
+const categories = ["Family & Legacy", "Second Chances", "Life Stories", "Justice & Truth", "Love After 50", "Grandparents"];
 type EditorPost = { slug: string; title: string; excerpt: string; category: string; seriesTitle: string | null; partNumber: number | null; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
 const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0], seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "draft", featured: false };
 
@@ -22,16 +22,19 @@ type TinyEditorInstance = {
   uploadImages(): Promise<unknown>;
 };
 
-export function PostEditor({ postId }: { postId?: number }) {
+export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = "", initialPartNumber = 1 }: { postId?: number; seriesMode?: boolean; initialSeriesTitle?: string; initialPartNumber?: number }) {
   const { t } = useAdminLocale();
-  const [post, setPost] = useState<EditorPost>(emptyPost);
+  const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: "Series", seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber) } : emptyPost);
   const [loading, setLoading] = useState(Boolean(postId)); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [message, setMessage] = useState("");
   const editor = useRef<TinyEditorInstance | null>(null);
   const featuredUpload = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (!postId) return; void fetch(`/api/admin/posts/${postId}`).then(async (response) => { const result = await response.json() as { post?: EditorPost; message?: string }; if (response.status === 401) return void (window.location.href = "/admin/login"); if (result.post) setPost({ ...result.post, readTime: readTimeMinutes(result.post.readTime) }); else setMessage(result.message || t("postNotFound")); setLoading(false); }); }, [postId, t]);
   function set<K extends keyof EditorPost>(key: K, value: EditorPost[K]) { setPost((current) => ({ ...current, [key]: value })); }
-  function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: createSlug(title) })); }
+  const isSeries = seriesMode || post.category === "Series";
+  function seriesSlug(current: EditorPost, title: string) { return createSlug(`${current.seriesTitle || "series"}-part-${current.partNumber || 1}-${title}`); }
+  function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: isSeries ? seriesSlug(current, title) : createSlug(title) })); }
+  function seriesTitleChanged(seriesTitle: string) { setPost((current) => ({ ...current, seriesTitle, slug: seriesSlug({ ...current, seriesTitle }, current.title) })); }
   async function uploadFile(file: Blob, progress?: (percent: number) => void) {
     const data = new FormData(); data.set("file", file); progress?.(10);
     const response = await fetch("/api/admin/upload", { method: "POST", body: data });
@@ -56,22 +59,24 @@ export function PostEditor({ postId }: { postId?: number }) {
   }
   async function submit(event: FormEvent) {
     event.preventDefault(); setSaving(true); setMessage("");
+    const shouldAddNext = ((event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value === "add-next";
     try { await editor.current?.uploadImages(); }
     catch (error) { setMessage(error instanceof Error ? error.message : t("uploadFailed")); setSaving(false); return; }
     const current = { ...post, contentHtml: editor.current?.getContent() || post.contentHtml };
     const response = await fetch(postId ? `/api/admin/posts/${postId}` : "/api/admin/posts", { method: postId ? "PUT" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(current) }); const result = await response.json() as { message?: string };
-    if (response.ok) window.location.href = "/admin"; else { setMessage(result.message || t("saveFailed")); setSaving(false); }
+    if (response.ok && shouldAddNext && isSeries) { const query = new URLSearchParams({ seriesTitle: post.seriesTitle || "", partNumber: String((post.partNumber || 1) + 1) }); window.location.href = `/admin/series/new?${query}`; }
+    else if (response.ok) window.location.href = "/admin"; else { setMessage(result.message || t("saveFailed")); setSaving(false); }
   }
   if (loading) return <main className="admin-main"><div className="admin-notice">{t("loadingEditor")}</div></main>;
 
   return <main className="admin-main">
-    <div className="admin-page-title"><div><span>{t("blog")}</span><h1>{postId ? t("editPost") : t("newPost")}</h1><p>{t("editorDescription")}</p></div><Link className="admin-back-link" href="/admin"><AdminIcon name="arrowLeft" />{t("backToPosts")}</Link></div>
+    <div className="admin-page-title"><div><span>{isSeries ? t("series") : t("blog")}</span><h1>{postId ? t("editPost") : isSeries ? t("newSeriesPart") : t("newPost")}</h1><p>{isSeries ? t("seriesEditorDescription") : t("editorDescription")}</p></div><Link className="admin-back-link" href="/admin"><AdminIcon name="arrowLeft" />{t("backToPosts")}</Link></div>
     <form className="admin-editor-form" onSubmit={submit}>
       <section className="admin-panel admin-fields">
-        <div className="field field--wide"><label>{t("title")} *</label><input value={post.title} onChange={(event) => titleChanged(event.target.value)} required /></div>
+        {isSeries && <div className="field field--wide"><label>{t("seriesTitle")} *</label><input value={post.seriesTitle || ""} onChange={(event) => seriesTitleChanged(event.target.value)} required maxLength={160} readOnly={Boolean(initialSeriesTitle && !postId)} /></div>}
+        <div className="field field--wide"><label>{isSeries ? t("partName") : t("title")} *</label><input value={post.title} onChange={(event) => titleChanged(event.target.value)} required /></div>
         <div className="field"><label>{t("slug")} *</label><input value={post.slug} readOnly required /></div>
-        <div className="field"><label>{t("category")}</label><select value={post.category} onChange={(event) => set("category", event.target.value)}>{categories.map((category) => <option key={category}>{category}</option>)}</select></div>
-        {post.category === "Series" && <><div className="field"><label>{t("seriesTitle")} *</label><input value={post.seriesTitle || ""} onChange={(event) => set("seriesTitle", event.target.value)} required maxLength={160} /></div><div className="field"><label>{t("partNumber")} *</label><input type="number" min="1" step="1" value={post.partNumber || ""} onChange={(event) => set("partNumber", Number(event.target.value) || null)} required /></div></>}
+        {isSeries ? <div className="field"><label>{t("currentPart")}</label><input value={`Part ${post.partNumber || 1}`} readOnly /></div> : <div className="field"><label>{t("category")}</label><select value={post.category} onChange={(event) => set("category", event.target.value)}>{categories.map((category) => <option key={category}>{category}</option>)}</select></div>}
         <div className="field"><label>{t("author")} *</label><input value={post.author} onChange={(event) => set("author", event.target.value)} required maxLength={120} /></div>
         <div className="field"><label>{t("featuredImage")} *</label><div className="media-url-field"><input type="url" value={post.imageUrl} onChange={(event) => set("imageUrl", event.target.value)} required /><button type="button" disabled={uploading} onClick={() => featuredUpload.current?.click()}><AdminIcon name="upload" />{uploading ? t("uploading") : t("chooseLocalImage")}</button><input ref={featuredUpload} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLocal(file, "featured"); event.target.value = ""; }} /></div>{post.imageUrl && <div className="featured-image-preview"><img src={post.imageUrl} alt={post.imageAlt || "Featured image preview"} /></div>}</div>
         <div className="field"><label>{t("readTime")}</label><input type="number" min="1" step="1" inputMode="numeric" value={post.readTime} onChange={(event) => set("readTime", event.target.value)} required /></div>
@@ -118,7 +123,7 @@ export function PostEditor({ postId }: { postId?: number }) {
           }}
         />
       </section>
-      {message && <div className="admin-error" role="alert">{message}</div>}<div className="editor-actions"><Link href="/admin">{t("cancel")}</Link><button className="admin-primary" disabled={saving || uploading}>{saving ? t("saving") : post.status === "published" ? t("publishPost") : t("saveDraft")}</button></div>
+      {message && <div className="admin-error" role="alert">{message}</div>}<div className="editor-actions"><Link href="/admin">{t("cancel")}</Link><button className="admin-primary" disabled={saving || uploading}>{saving ? t("saving") : post.status === "published" ? t("publishPost") : t("saveDraft")}</button>{isSeries && <button className="admin-primary admin-primary--next" type="submit" value="add-next" disabled={saving || uploading}>{t("addNextPart", { part: (post.partNumber || 1) + 1 })}</button>}</div>
     </form>
   </main>;
 }

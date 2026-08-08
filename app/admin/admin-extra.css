@@ -17,3 +17,4 @@
 @media (max-width: 620px) {
   .admin-title-actions { align-items: stretch; flex-direction: column; }
 }
+.admin-primary--next{background:#172033}.admin-primary--next:hover{background:#283650}

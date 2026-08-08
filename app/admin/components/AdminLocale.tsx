@@ -5,6 +5,7 @@ export type AdminLocale = "en" | "vi";
 
 const translations = {
   en: {
+    addSeries: "Add series", series: "Series", newSeriesPart: "Add series part", seriesEditorDescription: "Create a connected series one part at a time.", partName: "Part name", currentPart: "Part being added", addNextPart: "Save & add Part {part}",
     seriesTitle: "Series title", partNumber: "Part number",
     language: "Language", english: "English", vietnamese: "Tiếng Việt", overview: "Overview", posts: "Posts", addStory: "Add story", users: "Users", viewWebsite: "View website", settings: "Settings", signOut: "Sign out", contentManagement: "Content management", openSite: "Open site",
     signInTitle: "Porchlight Admin", signInDescription: "Sign in to manage stories.", emailOptional: "Email (additional users only)", ownerEmailHint: "Leave blank for the primary administrator", adminPassword: "Admin password", signIn: "Sign in", signingIn: "Signing in…", forgotPassword: "Forgot password?", sendingReset: "Sending reset link…", checkEmail: "Please check the administrator email.", loginFailed: "Login failed.",
@@ -14,6 +15,7 @@ const translations = {
     system: "System", settingsDescription: "Configuration is managed securely through Cloudflare environment variables.", requiredConfiguration: "Required configuration", d1Binding: "D1 binding", sessionSecret: "Session signing secret", canonicalWebsite: "Canonical website", secretNote: "Secrets are never displayed in the browser. Change them from the Cloudflare dashboard.", usersDescription: "Create accounts for people who can access the administration area.", addUser: "Add user", name: "Name", email: "Email", userAdded: "User added successfully.", userList: "Additional users", noAdditionalUsers: "No additional users yet.", deleteUserConfirm: "Delete this user? They will no longer be able to sign in.", changePassword: "Change password", currentPassword: "Current password", accountEmailOptional: "Account email (leave blank for primary admin)", passwordChanged: "Password changed successfully.",
   },
   vi: {
+    addSeries: "Thêm series", series: "Series", newSeriesPart: "Thêm part cho series", seriesEditorDescription: "Tạo series theo từng part được liên kết với nhau.", partName: "Tên riêng của part", currentPart: "Part đang thêm", addNextPart: "Lưu và thêm Part {part}",
     seriesTitle: "Tên series", partNumber: "Số part",
     language: "Ngôn ngữ", english: "English", vietnamese: "Tiếng Việt", overview: "Tổng quan", posts: "Bài viết", addStory: "Thêm bài viết", users: "Người dùng", viewWebsite: "Xem trang web", settings: "Cài đặt", signOut: "Đăng xuất", contentManagement: "Quản lý nội dung", openSite: "Mở trang web",
     signInTitle: "Quản trị Porchlight", signInDescription: "Đăng nhập để quản lý bài viết.", emailOptional: "Email (chỉ dành cho user được thêm)", ownerEmailHint: "Để trống nếu đăng nhập bằng tài khoản quản trị chính", adminPassword: "Mật khẩu quản trị", signIn: "Đăng nhập", signingIn: "Đang đăng nhập…", forgotPassword: "Quên mật khẩu?", sendingReset: "Đang gửi liên kết…", checkEmail: "Vui lòng kiểm tra email quản trị viên.", loginFailed: "Đăng nhập thất bại.",
