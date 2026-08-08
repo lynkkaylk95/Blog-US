@@ -41,7 +41,7 @@ async function uploadMedia(request: Request, env: Env) {
   const rule = uploadTypes[file.type]; if (!rule) return Response.json({ message: "Unsupported file type." }, { status: 415 }); if (file.size > rule.limit) return Response.json({ message: `${rule.kind === "image" ? "Images" : "Videos"} must be ${rule.limit / 1024 / 1024} MB or smaller.` }, { status: 413 });
   const date = new Date(); const key = `uploads/${date.getUTCFullYear()}/${String(date.getUTCMonth() + 1).padStart(2, "0")}/${crypto.randomUUID()}.${rule.extension}`;
   await env.MEDIA.put(key, file.stream(), { httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" }, customMetadata: { originalName: file.name.slice(0, 200) } });
-  return Response.json({ url: `/media/${key}`, kind: rule.kind });
+  return Response.json({ url: `${new URL(request.url).origin}/media/${key}`, kind: rule.kind });
 }
 
 async function serveMedia(request: Request, env: Env, pathname: string) {

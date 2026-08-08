@@ -19,5 +19,5 @@ export async function POST(request: Request) {
   const date = new Date(); const key = `uploads/${date.getUTCFullYear()}/${String(date.getUTCMonth() + 1).padStart(2, "0")}/${crypto.randomUUID()}.${extensions[file.type]}`;
   const bucket = (env as unknown as { MEDIA: R2Bucket }).MEDIA;
   await bucket.put(key, file.stream(), { httpMetadata: { contentType: file.type, cacheControl: "public, max-age=31536000, immutable" }, customMetadata: { originalName: file.name.slice(0, 200) } });
-  return NextResponse.json({ url: `/media/${key}`, kind: isImage ? "image" : "video" });
+  return NextResponse.json({ url: `${new URL(request.url).origin}/media/${key}`, kind: isImage ? "image" : "video" });
 }
