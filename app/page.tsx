@@ -14,11 +14,10 @@ export default async function Home() {
     <main>
       <Header />
       <section className="hero shell">
-        <div className="hero-image"><Image src={featured.image} alt={featured.imageAlt} fill priority sizes="(max-width: 900px) 100vw, 58vw" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
+        <div className="hero-image"><Image src={featured.image} alt={featured.title} fill priority sizes="(max-width: 900px) 100vw, 58vw" /><span className="photo-label">TODAY’S FEATURED STORY</span></div>
         <div className="hero-copy">
           <span className="eyebrow">{featured.category}</span>
           <h1>{featured.title}</h1>
-          <p>{featured.excerpt}</p>
           <div className="story-meta"><span>{featured.readTime}</span><span>•</span><span>{featured.date}</span></div>
           <Link href={`/story/${featured.slug}`} className="primary-button">Read the story <span>→</span></Link>
         </div>

@@ -59,6 +59,7 @@ async function serveMedia(request: Request, env: Env, pathname: string) {
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    (globalThis as typeof globalThis & { __PORCHLIGHT_RUNTIME_ENV__?: Record<string, unknown> }).__PORCHLIGHT_RUNTIME_ENV__ = env as unknown as Record<string, unknown>;
     const url = new URL(request.url);
 
     if (url.pathname === "/api/admin/upload" && request.method === "POST") return uploadMedia(request, env);

@@ -1,5 +1,5 @@
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
-import { env } from "cloudflare:workers";
+import { runtimeEnv } from "../app/runtime-env";
 import { getDb } from "./index";
 import { adminCredentials, adminPasswordResets } from "./schema";
 
@@ -16,7 +16,7 @@ async function digest(value: string) {
 }
 
 async function derivePassword(password: string, salt: string) {
-  const pepper = (env as unknown as { ADMIN_SESSION_SECRET?: string }).ADMIN_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+  const pepper = runtimeEnv("ADMIN_SESSION_SECRET");
   if (!pepper) throw new Error("ADMIN_SESSION_SECRET is not configured");
   const key = await crypto.subtle.importKey("raw", encoder.encode(pepper), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return base64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(`${salt}:${password}`))));
