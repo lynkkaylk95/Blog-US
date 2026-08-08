@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: siteName,
   icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
-    shortcut: "/favicon.png",
-    apple: "/favicon.png",
+    icon: [{ url: "/favicon-v2.png", type: "image/png", sizes: "192x192" }],
+    shortcut: "/favicon-v2.png",
+    apple: [{ url: "/favicon-v2.png", sizes: "192x192", type: "image/png" }],
   },
   verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   alternates: { canonical: "/", types: { "application/rss+xml": [{ url: "/feed.xml", title: "Porchlight Stories RSS" }] } },
