@@ -79,7 +79,6 @@ export function PostEditor({ postId }: { postId?: number }) {
           apiKey={import.meta.env.VITE_TINYMCE_API_KEY || "no-api-key"}
           onInit={(_, instance) => { editor.current = instance as TinyEditorInstance; }}
           initialValue={post.contentHtml || "<p></p>"}
-          onEditorChange={(content) => set("contentHtml", content)}
           init={{
             height: 650,
             menubar: "file edit view insert format tools table help",
@@ -89,7 +88,9 @@ export function PostEditor({ postId }: { postId?: number }) {
             block_formats: "Paragraph=p;Heading 2=h2;Heading 3=h3;Heading 4=h4;Quote=blockquote",
             font_family_formats: "Georgia=Georgia,serif;Arial=Arial,sans-serif;Verdana=Verdana,sans-serif;Times New Roman='Times New Roman',serif",
             font_size_formats: "12px 14px 16px 18px 20px 24px 28px 32px",
-            content_style: "body{font-family:Georgia,serif;font-size:18px;line-height:1.75;max-width:760px;margin:24px auto;padding:0 24px}img,video{max-width:100%;height:auto}h2{font-size:30px}h3{font-size:25px}h4{font-size:21px}",
+            content_style: "html,body{direction:ltr;text-align:left}body{font-family:Georgia,serif;font-size:18px;line-height:1.75;max-width:760px;margin:24px auto;padding:0 24px}img,video{max-width:100%;height:auto}h2{font-size:30px}h3{font-size:25px}h4{font-size:21px}",
+            directionality: "ltr",
+            entity_encoding: "raw",
             automatic_uploads: true,
             paste_data_images: true,
             images_reuse_filename: false,
