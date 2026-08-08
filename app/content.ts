@@ -25,6 +25,13 @@ export type Story = {
 export const categorySlugs: Record<string, string> = {
   "Family & Legacy": "family-legacy", "Second Chances": "second-chances", "Life Stories": "life-stories",
   "Justice & Truth": "justice-truth", "Love After 50": "love-after-50", Grandparents: "grandparents", Series: "series",
+  Mystery: "mystery", Secrets: "secrets", Confessions: "confessions", "Unbelievable Stories": "unbelievable-stories",
+  "Unexpected Encounters": "unexpected-encounters", "Plot Twists": "plot-twists", "Strange Stories": "strange-stories",
+  "Hidden Truths": "hidden-truths", "Revenge Stories": "revenge-stories", "Karma Stories": "karma-stories",
+  Cheating: "cheating", "First Love": "first-love", "Family Stories": "family-stories",
+  "Mother & Daughter": "mother-daughter", "Father & Son": "father-son", Parenting: "parenting",
+  "Family Secrets": "family-secrets", "Life & Lifestyle": "life-lifestyle", "Life Lessons": "life-lessons",
+  "Everyday Life": "everyday-life",
 };
 
 const modules = import.meta.glob("../content/stories/*.md", {

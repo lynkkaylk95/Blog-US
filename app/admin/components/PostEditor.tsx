@@ -6,9 +6,36 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
 
-const categories = ["Family & Legacy", "Second Chances", "Life Stories", "Justice & Truth", "Love After 50", "Grandparents"];
+const categories = [
+  { value: "Family & Legacy", label: "Family & Legacy (Gia đình & Di sản)" },
+  { value: "Second Chances", label: "Second Chances (Cơ hội thứ hai)" },
+  { value: "Life Stories", label: "Life Stories (Những câu chuyện cuộc sống)" },
+  { value: "Justice & Truth", label: "Justice & Truth (Công lý & Sự thật)" },
+  { value: "Love After 50", label: "Love After 50 (Tình yêu sau tuổi 50)" },
+  { value: "Grandparents", label: "Grandparents (Ông bà)" },
+  { value: "Mystery", label: "Mystery (Bí ẩn)" },
+  { value: "Secrets", label: "Secrets (Bí mật)" },
+  { value: "Confessions", label: "Confessions (Lời thú nhận)" },
+  { value: "Unbelievable Stories", label: "Unbelievable Stories (Những câu chuyện khó tin)" },
+  { value: "Unexpected Encounters", label: "Unexpected Encounters (Những cuộc gặp gỡ bất ngờ)" },
+  { value: "Plot Twists", label: "Plot Twists (Những cú ngoặt cốt truyện)" },
+  { value: "Strange Stories", label: "Strange Stories (Những câu chuyện kỳ lạ)" },
+  { value: "Hidden Truths", label: "Hidden Truths (Sự thật bị che giấu)" },
+  { value: "Revenge Stories", label: "Revenge Stories (Những câu chuyện trả thù)" },
+  { value: "Karma Stories", label: "Karma Stories (Những câu chuyện nhân quả)" },
+  { value: "Cheating", label: "Cheating (Ngoại tình)" },
+  { value: "First Love", label: "First Love (Tình đầu)" },
+  { value: "Family Stories", label: "Family Stories (Chuyện gia đình)" },
+  { value: "Mother & Daughter", label: "Mother & Daughter (Mẹ và con gái)" },
+  { value: "Father & Son", label: "Father & Son (Cha và con trai)" },
+  { value: "Parenting", label: "Parenting (Nuôi dạy con)" },
+  { value: "Family Secrets", label: "Family Secrets (Bí mật gia đình)" },
+  { value: "Life & Lifestyle", label: "Life & Lifestyle (Cuộc sống và phong cách sống)" },
+  { value: "Life Lessons", label: "Life Lessons (Bài học cuộc sống)" },
+  { value: "Everyday Life", label: "Everyday Life (Cuộc sống thường ngày)" },
+];
 type EditorPost = { slug: string; title: string; excerpt: string; category: string; seriesTitle: string | null; partNumber: number | null; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
-const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0], seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "draft", featured: false };
+const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0].value, seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "draft", featured: false };
 
 function createSlug(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -76,7 +103,7 @@ export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = ""
         {isSeries && <div className="field field--wide"><label>{t("seriesTitle")} *</label><input value={post.seriesTitle || ""} onChange={(event) => seriesTitleChanged(event.target.value)} required maxLength={160} readOnly={Boolean(initialSeriesTitle && !postId)} /></div>}
         <div className="field field--wide"><label>{isSeries ? t("partName") : t("title")} *</label><input value={post.title} onChange={(event) => titleChanged(event.target.value)} required /></div>
         <div className="field"><label>{t("slug")} *</label><input value={post.slug} readOnly required /></div>
-        {isSeries ? <div className="field"><label>{t("currentPart")}</label><input value={`Part ${post.partNumber || 1}`} readOnly /></div> : <div className="field"><label>{t("category")}</label><select value={post.category} onChange={(event) => set("category", event.target.value)}>{categories.map((category) => <option key={category}>{category}</option>)}</select></div>}
+        {isSeries ? <div className="field"><label>{t("currentPart")}</label><input value={`Part ${post.partNumber || 1}`} readOnly /></div> : <div className="field"><label>{t("category")}</label><select value={post.category} onChange={(event) => set("category", event.target.value)}>{categories.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}</select></div>}
         <div className="field"><label>{t("author")} *</label><input value={post.author} onChange={(event) => set("author", event.target.value)} required maxLength={120} /></div>
         <div className="field"><label>{t("featuredImage")} *</label><div className="media-url-field"><input type="url" value={post.imageUrl} onChange={(event) => set("imageUrl", event.target.value)} required /><button type="button" disabled={uploading} onClick={() => featuredUpload.current?.click()}><AdminIcon name="upload" />{uploading ? t("uploading") : t("chooseLocalImage")}</button><input ref={featuredUpload} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLocal(file, "featured"); event.target.value = ""; }} /></div>{post.imageUrl && <div className="featured-image-preview"><img src={post.imageUrl} alt={post.imageAlt || "Featured image preview"} /></div>}</div>
         <div className="field"><label>{t("readTime")}</label><input type="number" min="1" step="1" inputMode="numeric" value={post.readTime} onChange={(event) => set("readTime", event.target.value)} required /></div>
