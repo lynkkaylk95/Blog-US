@@ -61,8 +61,12 @@ export default async function StoryPage({ params }: StoryPageProps) {
 
   const allStories = await getPublishedStories();
   const seriesParts = story.seriesTitle ? allStories.filter((item) => item.seriesTitle === story.seriesTitle && item.partNumber).sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((item) => ({ slug: item.slug, title: item.title, partNumber: item.partNumber as number })) : [];
-  const sameAuthorStories = allStories.filter((item) => item.slug !== story.slug && item.author.toLowerCase() === story.author.toLowerCase()).slice(0, 3);
-  const relatedStories = allStories.filter((item) => item.slug !== story.slug && item.author.toLowerCase() !== story.author.toLowerCase()).slice(0, 3);
+  const sameCategoryStories = allStories.filter((item) => item.slug !== story.slug && item.category === story.category).slice(0, 3);
+  const sameCategorySlugs = new Set(sameCategoryStories.map((item) => item.slug));
+  const sameAuthorStories = allStories.filter((item) => item.slug !== story.slug && item.author.toLowerCase() === story.author.toLowerCase() && !sameCategorySlugs.has(item.slug)).slice(0, 3);
+  const usedSlugs = new Set([story.slug, ...sameCategoryStories.map((item) => item.slug), ...sameAuthorStories.map((item) => item.slug)]);
+  const relatedStories = allStories.filter((item) => !usedSlugs.has(item.slug)).slice(0, 3);
+  const inlineStories = (sameCategoryStories.length ? sameCategoryStories : sameAuthorStories.length ? sameAuthorStories : relatedStories).slice(0, 2);
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -88,10 +92,11 @@ export default async function StoryPage({ params }: StoryPageProps) {
     </article>
     <div className="article-image"><Image src={story.image} alt={story.title} fill priority unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) 100vw, 1100px" /></div>
     <div className="shell"><AdSlot /></div>
-    {story.contentHtml ? <RichStory html={story.contentHtml} /> : <Reader chapters={story.chapters} />}
+    {story.contentHtml ? <RichStory html={story.contentHtml} recommendations={inlineStories} category={story.category} /> : <Reader chapters={story.chapters} recommendations={inlineStories} category={story.category} />}
     {story.seriesTitle && seriesParts.length > 0 && <PartNavigator seriesTitle={story.seriesTitle} parts={seriesParts} currentSlug={story.slug} />}
+    {sameCategoryStories.length > 0 && <section className="more-stories same-category-stories shell"><div className="section-heading"><div><span className="eyebrow">More in this category</span><h2>More {story.category} stories</h2></div><Link href={`/category/${categorySlugs[story.category]}`}>View category →</Link></div><div className="popular-grid">{sameCategoryStories.map((item) => <StoryCard key={item.slug} story={item} />)}</div></section>}
     {sameAuthorStories.length > 0 && <section className="more-stories author-stories shell"><div className="section-heading"><div><span className="eyebrow">More from this author</span><h2>More stories by {story.author}</h2></div><Link href={`/author/${authorSlug(story.author)}`}>View all →</Link></div><div className="popular-grid">{sameAuthorStories.map((item) => <StoryCard key={item.slug} story={item} />)}</div></section>}
-    <section className="more-stories shell"><div className="section-heading"><div><span className="eyebrow">Keep reading</span><h2>More stories for you</h2></div></div><div className="popular-grid">{relatedStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section>
+    {relatedStories.length > 0 && <section className="more-stories shell"><div className="section-heading"><div><span className="eyebrow">Keep reading</span><h2>More stories for you</h2></div></div><div className="popular-grid">{relatedStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section>}
     <footer className="article-footer"><Link href="/">← Back to Porchlight Stories</Link><span>© 2026 Porchlight Stories</span></footer>
   </main>;
 }

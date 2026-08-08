@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import type { Chapter } from "../../content";
 import { AdSlot } from "../../components/AdSlot";
+import { InlineRecommendations, type InlineRecommendation } from "../../components/InlineRecommendations";
 
-export function Reader({ chapters }: { chapters: Chapter[] }) {
+export function Reader({ chapters, recommendations, category }: { chapters: Chapter[]; recommendations: InlineRecommendation[]; category: string }) {
   const [fontSize, setFontSize] = useState(22);
   const [theme, setTheme] = useState<"paper" | "cream" | "night">("paper");
   const [settings, setSettings] = useState(false);
@@ -43,6 +44,7 @@ export function Reader({ chapters }: { chapters: Chapter[] }) {
             {chapter.paragraphs.map((p, index) => <p key={index}>{p}</p>)}
             {i === 0 && <AdSlot compact />}
             {i === 2 && <AdSlot compact />}
+            {i === Math.floor((chapters.length - 1) / 2) && <InlineRecommendations stories={recommendations} category={category} />}
           </section>)}
           <div className="story-end">THE END</div>
           <section className="reaction-box">
