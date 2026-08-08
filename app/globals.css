@@ -49,3 +49,13 @@ footer{padding:78px 0 28px}.footer-grid{gap:64px}.footer-grid p{font-size:16px}.
   .breadcrumbs{font-size:13px;margin:26px 0 38px}.article-byline{gap:10px}.article-byline b,.article-byline span{font-size:13px}.author-avatar{width:44px;height:44px}.share-row{gap:8px}.share-row button{flex:1;min-height:44px;font-size:14px}.back-to-top{right:16px!important;bottom:16px!important;width:48px!important;height:48px!important}
 }
 @media(max-width:380px){.brand strong{font-size:21px}.header-button{padding-inline:11px}.hero-image{min-height:340px}.section-heading h2{font-size:32px}.story-image-wrap{height:230px}}
+
+/* List-first homepage */
+.popular-band--first{padding-top:68px}.popular-band--first .section-heading h1{font:700 46px/1 var(--serif);margin:0}
+.story-shelf{padding:82px 0}.story-shelf.shell{width:min(1220px,calc(100% - 64px))}.story-shelf .popular-grid{row-gap:58px}
+.story-shelf .story-image-wrap{height:270px}.story-shelf--tint{background:var(--cream)}.story-shelf--tint .section-heading{border-color:#d8cbbb}
+.newsletter-band{background:var(--green);color:#fff;padding:76px 0}.newsletter-band__inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,500px);align-items:center;gap:80px}
+.newsletter-band h2{font:700 44px/1.05 var(--serif);margin:0 0 14px}.newsletter-band p{max-width:560px;color:#d3ddda;font:19px/1.6 var(--serif)}
+.newsletter--inline{position:static;background:#fff;color:var(--ink);border-top:4px solid var(--wine);padding:32px 36px;box-shadow:var(--shadow-soft)}.newsletter--inline label{margin-top:0}.newsletter--inline .form-message--success{color:var(--green)}.newsletter--inline .form-message--error{color:#a12743}
+@media(max-width:900px){.story-shelf.shell{width:min(100% - 40px,1220px)}.newsletter-band__inner{grid-template-columns:1fr;gap:30px}.newsletter--inline{max-width:none}}
+@media(max-width:620px){.popular-band--first{padding-top:46px}.popular-band--first .section-heading h1{font-size:36px}.story-shelf{padding:58px 0}.story-shelf.shell{width:min(100% - 32px,1220px)}.story-shelf .story-image-wrap{height:260px}.story-shelf .popular-grid{row-gap:40px}.newsletter-band{padding:58px 0}.newsletter-band__inner{gap:24px}.newsletter-band h2{font-size:36px}.newsletter--inline{padding:26px 22px}}
