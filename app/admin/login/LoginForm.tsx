@@ -10,8 +10,8 @@ export function LoginForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setLoading(true); setMessage("");
-    const data = new FormData(event.currentTarget); const password = String(data.get("password") || ""); const email = String(data.get("email") || "");
-    const response = await fetch("/api/admin/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password }) });
+    const data = new FormData(event.currentTarget); const password = String(data.get("password") || ""); const identifier = String(data.get("identifier") || "Admin");
+    const response = await fetch("/api/admin/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ identifier, password }) });
     const result = await response.json() as { message?: string };
     if (response.ok) window.location.href = "/admin";
     else { setMessage(result.message || t("loginFailed")); setLoading(false); }
@@ -24,5 +24,5 @@ export function LoginForm() {
     setMessage(response.ok ? t("checkEmail") : result.message || t("resetFailed")); setResetting(false);
   }
 
-  return <form className="admin-login-card" onSubmit={submit}><div className="admin-login-head"><div className="admin-logo">P</div><LanguageSwitcher /></div><h1>{t("signInTitle")}</h1><p>{t("signInDescription")}</p><label htmlFor="admin-email">{t("emailOptional")}</label><input id="admin-email" name="email" type="email" autoComplete="username" placeholder={t("ownerEmailHint")} /><label htmlFor="admin-password">{t("adminPassword")}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" required autoFocus /><button disabled={loading}>{loading ? t("signingIn") : t("signIn")}</button><button className="admin-link-button" type="button" disabled={resetting} onClick={forgotPassword}>{resetting ? t("sendingReset") : t("forgotPassword")}</button>{message && <div className="admin-message" role="status">{message}</div>}</form>;
+  return <form className="admin-login-card" onSubmit={submit}><div className="admin-login-head"><div className="admin-logo">P</div><LanguageSwitcher /></div><h1>{t("signInTitle")}</h1><p>{t("signInDescription")}</p><label htmlFor="admin-identifier">{t("emailOptional")}</label><input id="admin-identifier" name="identifier" type="text" autoComplete="username" defaultValue="Admin" placeholder={t("ownerEmailHint")} required /><label htmlFor="admin-password">{t("adminPassword")}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" required autoFocus /><button disabled={loading}>{loading ? t("signingIn") : t("signIn")}</button><button className="admin-link-button" type="button" disabled={resetting} onClick={forgotPassword}>{resetting ? t("sendingReset") : t("forgotPassword")}</button>{message && <div className="admin-message" role="status">{message}</div>}</form>;
 }
