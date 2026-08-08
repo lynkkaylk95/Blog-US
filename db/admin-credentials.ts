@@ -1,4 +1,5 @@
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { env } from "cloudflare:workers";
 import { getDb } from "./index";
 import { adminCredentials, adminPasswordResets } from "./schema";
 
@@ -15,9 +16,10 @@ async function digest(value: string) {
 }
 
 async function derivePassword(password: string, salt: string) {
-  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: encoder.encode(salt), iterations: 210_000 }, key, 256);
-  return base64Url(new Uint8Array(bits));
+  const pepper = (env as unknown as { ADMIN_SESSION_SECRET?: string }).ADMIN_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+  if (!pepper) throw new Error("ADMIN_SESSION_SECRET is not configured");
+  const key = await crypto.subtle.importKey("raw", encoder.encode(pepper), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  return base64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(`${salt}:${password}`))));
 }
 
 function safeEqual(left: string, right: string) {
