@@ -3,6 +3,12 @@
   "name": "porchlight-stories",
   "main": "worker/index.ts",
   "compatibility_date": "2026-05-22",
+  "routes": [
+    {
+      "pattern": "blogus.cinemaxmx.com",
+      "custom_domain": true
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
