@@ -33,3 +33,13 @@ export const adminPasswordResets = sqliteTable("admin_password_resets", {
   usedAt: text("used_at"),
   createdAt: text("created_at").notNull(),
 });
+
+export const adminUsers = sqliteTable("admin_users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  passwordSalt: text("password_salt").notNull(),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull(),
+});

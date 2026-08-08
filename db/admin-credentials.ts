@@ -1,7 +1,7 @@
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { runtimeEnv } from "../app/runtime-env";
 import { getDb } from "./index";
-import { adminCredentials, adminPasswordResets } from "./schema";
+import { adminCredentials, adminPasswordResets, adminUsers } from "./schema";
 
 const encoder = new TextEncoder();
 
@@ -22,6 +22,12 @@ async function derivePassword(password: string, salt: string) {
   return base64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(`${salt}:${password}`))));
 }
 
+export async function createPasswordHash(password: string) {
+  const saltBytes = new Uint8Array(24); crypto.getRandomValues(saltBytes);
+  const salt = base64Url(saltBytes);
+  return { passwordSalt: salt, passwordHash: await derivePassword(password, salt) };
+}
+
 function safeEqual(left: string, right: string) {
   if (left.length !== right.length) return false;
   let mismatch = 0;
@@ -33,6 +39,12 @@ export async function verifyStoredAdminPassword(password: string) {
   const credential = (await getDb().select().from(adminCredentials).where(eq(adminCredentials.id, 1)).limit(1))[0];
   if (!credential) return null;
   return safeEqual(await derivePassword(password, credential.passwordSalt), credential.passwordHash);
+}
+
+export async function verifyAdminUser(email: string, password: string) {
+  const user = (await getDb().select().from(adminUsers).where(eq(adminUsers.email, email.trim().toLowerCase())).limit(1))[0];
+  if (!user || !user.active) return false;
+  return safeEqual(await derivePassword(password, user.passwordSalt), user.passwordHash);
 }
 
 export async function createPasswordReset() {
@@ -50,10 +62,8 @@ export async function resetAdminPassword(token: string, password: string) {
   const now = new Date().toISOString();
   const reset = (await getDb().select().from(adminPasswordResets).where(and(eq(adminPasswordResets.tokenHash, tokenHash), isNull(adminPasswordResets.usedAt), gt(adminPasswordResets.expiresAt, now))).limit(1))[0];
   if (!reset) return false;
-  const saltBytes = new Uint8Array(24); crypto.getRandomValues(saltBytes);
-  const salt = base64Url(saltBytes);
-  const passwordHash = await derivePassword(password, salt);
-  await getDb().insert(adminCredentials).values({ id: 1, passwordHash, passwordSalt: salt, updatedAt: now }).onConflictDoUpdate({ target: adminCredentials.id, set: { passwordHash, passwordSalt: salt, updatedAt: now } });
+  const derived = await createPasswordHash(password);
+  await getDb().insert(adminCredentials).values({ id: 1, ...derived, updatedAt: now }).onConflictDoUpdate({ target: adminCredentials.id, set: { ...derived, updatedAt: now } });
   await getDb().update(adminPasswordResets).set({ usedAt: now }).where(eq(adminPasswordResets.id, reset.id));
   return true;
 }
