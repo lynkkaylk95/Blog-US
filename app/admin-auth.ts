@@ -1,5 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { runtimeEnv } from "./runtime-env";
+import { getStoredAdminSessionKey } from "../db/admin-credentials";
 
 const cookieName = "porchlight_admin";
 const lifetimeSeconds = 60 * 60 * 12;
@@ -10,11 +11,19 @@ function bytesToBase64Url(bytes: Uint8Array) {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+async function sessionSecret() {
+  return runtimeEnv("ADMIN_SESSION_SECRET") || await getStoredAdminSessionKey();
+}
+
 async function signature(value: string) {
-  const secret = runtimeEnv("ADMIN_SESSION_SECRET");
+  const secret = await sessionSecret();
   if (!secret) throw new Error("ADMIN_SESSION_SECRET is not configured");
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return bytesToBase64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value))));
+}
+
+export async function hasAdminSessionSigningKey() {
+  return Boolean(await sessionSecret());
 }
 
 export async function createAdminToken() {

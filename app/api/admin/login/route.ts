@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { adminCookieOptions, cookieName, createAdminToken, hasValidMutationOrigin } from "../../../admin-auth";
-import { runtimeEnv } from "../../../runtime-env";
+import { adminCookieOptions, cookieName, createAdminToken, hasAdminSessionSigningKey, hasValidMutationOrigin } from "../../../admin-auth";
 import { authenticateAdmin, primaryAdminUsername } from "../../../../db/admin-authentication";
 
 export async function POST(request: Request) {
@@ -10,7 +9,7 @@ export async function POST(request: Request) {
   const identifier = typeof body.identifier === "string" ? body.identifier : typeof body.email === "string" && body.email.trim() ? body.email : primaryAdminUsername;
   const authenticated = await authenticateAdmin(identifier, body.password).catch(() => false);
   if (!authenticated) return NextResponse.json({ message: "Incorrect username or password." }, { status: 401 });
-  if (!runtimeEnv("ADMIN_SESSION_SECRET")) return NextResponse.json({ message: "Admin session signing is not configured." }, { status: 503 });
+  if (!await hasAdminSessionSigningKey()) return NextResponse.json({ message: "Admin session signing is not configured." }, { status: 503 });
   const response = NextResponse.json({ ok: true });
   response.cookies.set(cookieName, await createAdminToken(), adminCookieOptions());
   return response;

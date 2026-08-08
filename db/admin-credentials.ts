@@ -51,6 +51,11 @@ export async function verifyStoredAdminPassword(password: string) {
   return match;
 }
 
+export async function getStoredAdminSessionKey() {
+  const credential = (await getDb().select().from(adminCredentials).where(eq(adminCredentials.id, 1)).limit(1))[0];
+  return credential ? `porchlight-admin:${credential.passwordSalt}:${credential.passwordHash}` : undefined;
+}
+
 export async function verifyAdminUser(email: string, password: string) {
   const user = (await getDb().select().from(adminUsers).where(eq(adminUsers.email, email.trim().toLowerCase())).limit(1))[0];
   if (!user || !user.active) return false;
