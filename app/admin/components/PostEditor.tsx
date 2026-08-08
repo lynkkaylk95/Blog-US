@@ -36,7 +36,10 @@ export function PostEditor({ postId }: { postId?: number }) {
     const data = new FormData(); data.set("file", file); progress?.(10);
     const response = await fetch("/api/admin/upload", { method: "POST", body: data });
     if (response.status === 401) { window.location.href = "/admin/login"; throw new Error("Unauthorized"); }
-    const result = await response.json() as { url?: string; message?: string };
+    const responseText = await response.text();
+    let result: { url?: string; message?: string } = {};
+    try { result = JSON.parse(responseText) as { url?: string; message?: string }; }
+    catch { if (!response.ok) throw new Error(`Upload failed (${response.status}). Please sign in again and retry.`); }
     if (!response.ok || !result.url) throw new Error(result.message || t("uploadFailed"));
     progress?.(100);
     return new URL(result.url, window.location.origin).toString();
