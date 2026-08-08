@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runtimeEnv } from "../../runtime-env";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const googleSheetsWebhook = "https://script.google.com/macros/s/AKfycbxzhOj-bkv6bnp_pGEtsuYC2Q1xiAEOi0o0HwpUXs9PLqnq41_3bRjX0U1yzSdrL4Rm/exec";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null) as { email?: unknown; website?: unknown } | null;
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "You’re on the list." });
   }
 
-  const endpoint = runtimeEnv("NEWSLETTER_WEBHOOK_URL");
+  const endpoint = runtimeEnv("NEWSLETTER_WEBHOOK_URL") || googleSheetsWebhook;
   if (!endpoint) {
     return NextResponse.json({ message: "Newsletter signup is being connected. Please try again soon." }, { status: 503 });
   }
