@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Story } from "../content";
+import { CategoryTags } from "./CategoryTags";
 
 export function FeaturedStoryCard({ story }: { story: Story }) {
   const displayTitle = story.seriesTitle || story.title;
@@ -9,7 +10,7 @@ export function FeaturedStoryCard({ story }: { story: Story }) {
       <Image src={story.image} alt={displayTitle} fill unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) 110px, 150px" />
     </Link>
     <div>
-      <span>{story.seriesTitle ? "Series" : story.category}</span>
+      <CategoryTags categories={story.categories} />
       <h3><Link href={`/story/${story.slug}`}>{displayTitle}</Link></h3>
       <small>{story.readTime} · {story.date}</small>
     </div>

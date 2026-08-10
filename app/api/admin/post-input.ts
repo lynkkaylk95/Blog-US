@@ -2,7 +2,7 @@ import sanitizeHtml from "sanitize-html";
 import { categorySlugs } from "../../content";
 
 export type PostInput = {
-  slug: string; title: string; excerpt: string; category: string; imageUrl: string; imageAlt: string;
+  slug: string; title: string; excerpt: string; category: string; categories: string; imageUrl: string; imageAlt: string;
   contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean;
   seriesTitle: string | null; partNumber: number | null;
 };
@@ -14,8 +14,10 @@ export function validatePostInput(value: unknown): { data?: PostInput; message?:
   for (const field of stringFields) if (typeof input[field] !== "string" || !input[field].trim()) return { message: `${field} is required.` };
   const slug = String(input.slug).trim();
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return { message: "Slug must use lowercase letters, numbers, and hyphens." };
-  if (!(String(input.category) in categorySlugs)) return { message: "Unsupported category." };
-  const isSeries = String(input.category) === "Series";
+  const requestedCategories = Array.isArray(input.categories) ? input.categories.filter((item): item is string => typeof item === "string").map((item) => item.trim()).filter(Boolean) : [String(input.category)];
+  const categories = [...new Set(requestedCategories)];
+  if (!categories.length || categories.some((category) => !(category in categorySlugs))) return { message: "Select at least one supported category." };
+  const isSeries = categories.includes("Series");
   const seriesTitle = typeof input.seriesTitle === "string" ? input.seriesTitle.trim() : "";
   const partNumber = Number(input.partNumber);
   if (isSeries && !seriesTitle) return { message: "Series title is required for a series post." };
@@ -32,5 +34,5 @@ export function validatePostInput(value: unknown): { data?: PostInput; message?:
     transformTags: { a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }, true), iframe: sanitizeHtml.simpleTransform("iframe", { loading: "lazy" }, true) },
   });
   if (!sanitizeHtml(contentHtml, { allowedTags: [] }).trim()) return { message: "Post content is empty." };
-  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: String(input.category), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true, seriesTitle: isSeries ? seriesTitle : null, partNumber: isSeries ? partNumber : null } };
+  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: categories[0], categories: JSON.stringify(categories), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true, seriesTitle: isSeries ? seriesTitle : null, partNumber: isSeries ? partNumber : null } };
 }

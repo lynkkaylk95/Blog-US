@@ -14,6 +14,7 @@ import { RichStory } from "./RichStory";
 import { ViewTracker } from "./ViewTracker";
 import { authorInitials, authorSlug } from "../../author-utils";
 import { PartNavigator } from "./PartNavigator";
+import { CategoryTags } from "../../components/CategoryTags";
 import { collapseSeriesStories, normalizeSeriesTitle } from "../../series";
 
 export const dynamic = "force-dynamic";
@@ -64,7 +65,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
   const seriesKey = story.seriesTitle ? normalizeSeriesTitle(story.seriesTitle) : "";
   const seriesParts = story.seriesTitle ? allStories.filter((item) => item.seriesTitle && normalizeSeriesTitle(item.seriesTitle) === seriesKey && item.partNumber).sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((item) => ({ slug: item.slug, title: item.title, partNumber: item.partNumber as number })) : [];
   const isCurrentSeries = (item: typeof story) => Boolean(seriesKey && item.seriesTitle && normalizeSeriesTitle(item.seriesTitle) === seriesKey);
-  const sameCategoryStories = collapseSeriesStories(allStories.filter((item) => item.slug !== story.slug && !isCurrentSeries(item) && item.category === story.category)).slice(0, 3);
+  const sameCategoryStories = collapseSeriesStories(allStories.filter((item) => item.slug !== story.slug && !isCurrentSeries(item) && item.categories.includes(story.category))).slice(0, 3);
   const sameCategorySlugs = new Set(sameCategoryStories.map((item) => item.slug));
   const sameAuthorStories = collapseSeriesStories(allStories.filter((item) => item.slug !== story.slug && !isCurrentSeries(item) && item.author.toLowerCase() === story.author.toLowerCase() && !sameCategorySlugs.has(item.slug))).slice(0, 3);
   const usedSlugs = new Set([story.slug, ...sameCategoryStories.map((item) => item.slug), ...sameAuthorStories.map((item) => item.slug)]);
@@ -90,6 +91,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
     <article className="article-hero shell">
       <div className="breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href={`/category/${categorySlugs[story.category]}`}>{story.category}</Link></div>
       <span className={`eyebrow${story.seriesTitle ? " series-heading" : ""}`}>{story.seriesTitle || story.category}</span>
+      <CategoryTags categories={story.categories} />
       <h1>{story.seriesTitle ? `Part ${story.partNumber}: ${story.title}` : story.title}</h1>
       <div className="article-byline"><div className="author-avatar">{authorInitials(story.author)}</div><div><b>By <Link href={`/author/${authorSlug(story.author)}`}>{story.author}</Link></b><span>{story.date} · {story.readTime} · <ViewTracker slug={story.slug} initialViews={story.views} /></span>{story.updatedDate !== story.date && <span>Updated {story.updatedDate}</span>}</div><ShareButtons title={story.title} /></div>
     </article>

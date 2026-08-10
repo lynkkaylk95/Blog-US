@@ -1,3 +1,5 @@
+.category-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}.category-tags a{color:var(--wine);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:lowercase}.category-tags a:hover{text-decoration:underline}.article-hero>.category-tags{justify-content:center;margin:-8px 0 20px}.featured-story-card .category-tags{margin-bottom:6px}.featured-story-card .category-tags a{font-size:9px}
+
 .newsletter-form {
   display: contents;
 }

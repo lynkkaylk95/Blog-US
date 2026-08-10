@@ -34,8 +34,8 @@ const categories = [
   { value: "Life Lessons", label: "Life Lessons (Bài học cuộc sống)" },
   { value: "Everyday Life", label: "Everyday Life (Cuộc sống thường ngày)" },
 ];
-type EditorPost = { slug: string; title: string; excerpt: string; category: string; seriesTitle: string | null; partNumber: number | null; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
-const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0].value, seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "published", featured: false };
+type EditorPost = { slug: string; title: string; excerpt: string; category: string; categories: string[]; seriesTitle: string | null; partNumber: number | null; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
+const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0].value, categories: [categories[0].value], seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "published", featured: false };
 
 function createSlug(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -51,14 +51,16 @@ type TinyEditorInstance = {
 
 export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = "", initialPartNumber = 1 }: { postId?: number; seriesMode?: boolean; initialSeriesTitle?: string; initialPartNumber?: number }) {
   const { t } = useAdminLocale();
-  const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: "Series", seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber) } : emptyPost);
+  const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: "Series", categories: ["Series"], seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber) } : emptyPost);
   const [loading, setLoading] = useState(Boolean(postId)); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [message, setMessage] = useState("");
   const editor = useRef<TinyEditorInstance | null>(null);
   const featuredUpload = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if (!postId) return; void fetch(`/api/admin/posts/${postId}`).then(async (response) => { const result = await response.json() as { post?: EditorPost; message?: string }; if (response.status === 401) return void (window.location.href = "/admin/login"); if (result.post) setPost({ ...result.post, readTime: readTimeMinutes(result.post.readTime) }); else setMessage(result.message || t("postNotFound")); setLoading(false); }); }, [postId, t]);
+  useEffect(() => { if (!postId) return; void fetch(`/api/admin/posts/${postId}`).then(async (response) => { const result = await response.json() as { post?: Omit<EditorPost, "categories"> & { categories?: string | string[] }; message?: string }; if (response.status === 401) return void (window.location.href = "/admin/login"); if (result.post) { let selected: string[] = []; try { selected = Array.isArray(result.post.categories) ? result.post.categories : JSON.parse(result.post.categories || "[]") as string[]; } catch { selected = []; } setPost({ ...result.post, categories: selected.length ? selected : [result.post.category], readTime: readTimeMinutes(result.post.readTime) }); } else setMessage(result.message || t("postNotFound")); setLoading(false); }); }, [postId, t]);
   function set<K extends keyof EditorPost>(key: K, value: EditorPost[K]) { setPost((current) => ({ ...current, [key]: value })); }
-  const isSeries = seriesMode || post.category === "Series";
+  function addCategory(value: string) { if (!value) return; setPost((current) => current.categories.includes(value) ? current : { ...current, category: current.categories[0] || value, categories: [...current.categories, value] }); }
+  function removeCategory(value: string) { setPost((current) => { const selected = current.categories.filter((item) => item !== value); return { ...current, category: selected[0] || "", categories: selected }; }); }
+  const isSeries = seriesMode || post.categories.includes("Series");
   function seriesSlug(current: EditorPost, title: string) { return createSlug(`${current.seriesTitle || "series"}-part-${current.partNumber || 1}-${title}`); }
   function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: isSeries ? seriesSlug(current, title) : createSlug(title) })); }
   function seriesTitleChanged(seriesTitle: string) { setPost((current) => ({ ...current, seriesTitle, slug: seriesSlug({ ...current, seriesTitle }, current.title) })); }
@@ -103,7 +105,8 @@ export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = ""
         {isSeries && <div className="field field--wide"><label>{t("seriesTitle")} *</label><input value={post.seriesTitle || ""} onChange={(event) => seriesTitleChanged(event.target.value)} required maxLength={160} readOnly={Boolean(initialSeriesTitle && !postId)} /></div>}
         <div className="field field--wide"><label>{isSeries ? t("partName") : t("title")} *</label><input value={post.title} onChange={(event) => titleChanged(event.target.value)} required /></div>
         <div className="field"><label>{t("slug")} *</label><input value={post.slug} readOnly required /></div>
-        {isSeries ? <div className="field"><label>{t("currentPart")}</label><input value={`Part ${post.partNumber || 1}`} readOnly /></div> : <div className="field"><label>{t("category")}</label><select value={post.category} onChange={(event) => set("category", event.target.value)}>{categories.map((category) => <option key={category.value} value={category.value}>{category.label}</option>)}</select></div>}
+        {isSeries && <div className="field"><label>{t("currentPart")}</label><input value={`Part ${post.partNumber || 1}`} readOnly /></div>}
+        <div className="field field--wide"><label>{t("category")} *</label><select value="" onChange={(event) => addCategory(event.target.value)}><option value="">+ {t("category")}</option>{categories.filter((item) => !post.categories.includes(item.value)).map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><div className="category-chips">{post.categories.map((value) => <span key={value}>#{createSlug(value)}{!(isSeries && value === "Series") && <button type="button" onClick={() => removeCategory(value)} aria-label={`Remove ${value}`}>×</button>}</span>)}</div></div>
         <div className="field"><label>{t("author")} *</label><input value={post.author} onChange={(event) => set("author", event.target.value)} required maxLength={120} /></div>
         <div className="field"><label>{t("featuredImage")} *</label><div className="media-url-field"><input type="url" value={post.imageUrl} onChange={(event) => set("imageUrl", event.target.value)} required /><button type="button" disabled={uploading} onClick={() => featuredUpload.current?.click()}><AdminIcon name="upload" />{uploading ? t("uploading") : t("chooseLocalImage")}</button><input ref={featuredUpload} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLocal(file, "featured"); event.target.value = ""; }} /></div>{post.imageUrl && <div className="featured-image-preview"><img src={post.imageUrl} alt={post.imageAlt || "Featured image preview"} /></div>}</div>
         <div className="field"><label>{t("readTime")}</label><input type="number" min="1" step="1" inputMode="numeric" value={post.readTime} onChange={(event) => set("readTime", event.target.value)} required /></div>
@@ -118,7 +121,6 @@ export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = ""
           onInit={(_, instance) => { editor.current = instance as TinyEditorInstance; }}
           initialValue={post.contentHtml || "<p></p>"}
           init={{
-            license_key: "gpl",
             height: 650,
             menubar: "file edit view insert format tools table help",
             plugins: "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount",

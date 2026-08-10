@@ -24,7 +24,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const category = categories[slug];
   if (!category) notFound();
   const stories = await getPublishedStories();
-  const categoryStories = stories.filter((story) => story.category === category);
+  const categoryStories = stories.filter((story) => story.categories.includes(category));
   const series = slug === "series" ? [...categoryStories.reduce((groups, story) => {
     if (!story.seriesTitle) return groups;
     const key = normalizeSeriesTitle(story.seriesTitle);

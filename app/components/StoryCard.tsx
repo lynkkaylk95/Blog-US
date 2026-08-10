@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Story } from "../content";
 import { authorSlug } from "../author-utils";
+import { CategoryTags } from "./CategoryTags";
 
 export function StoryCard({ story, rank }: { story: Story; rank?: number }) {
   const displayTitle = story.seriesTitle || story.title;
@@ -12,7 +13,7 @@ export function StoryCard({ story, rank }: { story: Story; rank?: number }) {
         <Image className="story-image" src={story.image} alt={displayTitle} fill unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) calc(100vw - 28px), (max-width: 900px) 50vw, 380px" />
       </Link>
       <div className="story-copy">
-        <span className="eyebrow">{story.seriesTitle ? "Series" : story.category}</span>
+        <CategoryTags categories={story.categories} />
         <h3><Link href={`/story/${story.slug}`}>{displayTitle}</Link></h3>
         <div className="story-author">By <Link href={`/author/${authorSlug(story.author)}`}>{story.author}</Link></div>
         <div className="story-meta"><span>{story.readTime}</span><span>•</span><span>{story.date}</span></div>

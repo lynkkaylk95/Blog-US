@@ -3,6 +3,7 @@ export type Chapter = { title: string; paragraphs: string[] };
 export type Story = {
   slug: string;
   category: string;
+  categories: string[];
   seriesTitle?: string | null;
   partNumber?: number | null;
   title: string;
@@ -85,7 +86,7 @@ function parseStory(source: string, file: string): Story {
   const updatedAt = String(values.updatedAt);
   const formatDate = (value: string) => new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" }).format(new Date(value));
   return {
-    slug: String(values.slug), category: String(values.category), title: String(values.title), excerpt: String(values.excerpt),
+    slug: String(values.slug), category: String(values.category), categories: [String(values.category)], title: String(values.title), excerpt: String(values.excerpt),
     image: String(values.image), imageAlt: String(values.imageAlt), readTime: String(values.readTime), publishedAt,
     updatedAt, status: values.status, featured: values.featured === true, author: "Porchlight Editors", views: 0, seriesTitle: null, partNumber: null,
     chapters: parseChapters(body, file),

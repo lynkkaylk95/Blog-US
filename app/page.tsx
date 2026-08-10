@@ -17,7 +17,7 @@ export default async function Home() {
   const featuredStories = collapseSeriesStories(stories.filter((story) => story.featured)).slice(0, 5);
   const mostRead = collapseSeriesStories([...stories].sort((a, b) => b.views - a.views)).slice(0, 3);
   const categoryGroups = Object.entries(categorySlugs)
-    .map(([name, slug]) => ({ name, slug, stories: collapseSeriesStories(stories.filter((story) => story.category === name)).slice(0, 3) }))
+    .map(([name, slug]) => ({ name, slug, stories: collapseSeriesStories(stories.filter((story) => story.categories.includes(name))).slice(0, 3) }))
     .filter((group) => group.stories.length > 0)
     .slice(0, 4);
 

@@ -5,9 +5,10 @@ import Link from "next/link";
 import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
 
-type Post = { id: number; slug: string; title: string; imageUrl: string; status: "draft" | "published"; updatedAt: string; publishedAt: string | null; category: string; author: string; views: number; seriesTitle: string | null; partNumber: number | null };
+type Post = { id: number; slug: string; title: string; imageUrl: string; status: "draft" | "published"; updatedAt: string; publishedAt: string | null; category: string; categories: string; author: string; views: number; seriesTitle: string | null; partNumber: number | null };
 type PostGroup = { key: string; title: string | null; posts: Post[] };
 const seriesKey = (value: string) => value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+const postCategories = (post: Post) => { try { const values = JSON.parse(post.categories) as string[]; return values.length ? values : [post.category]; } catch { return [post.category]; } };
 
 export function AdminDashboard() {
   const { locale, t } = useAdminLocale();
