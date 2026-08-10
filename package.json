@@ -9,6 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
+    "postinstall": "node scripts/sync-tinymce.mjs",
     "content:check": "vinext build",
     "test": "vinext build && node --test tests/rendered-html.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
@@ -22,7 +23,8 @@
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6",
-    "sanitize-html": "^2.17.6"
+    "sanitize-html": "^2.17.6",
+    "tinymce": "8.0.0"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "1.37.1",

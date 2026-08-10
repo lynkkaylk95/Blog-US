@@ -113,10 +113,12 @@ export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = ""
       <section className="admin-panel rich-panel"><div className="rich-label">{t("storyContent")} *</div>
         {uploading && <div className="upload-progress" role="status">{t("uploading")}</div>}
         <Editor
-          apiKey={import.meta.env.VITE_TINYMCE_API_KEY || "no-api-key"}
+          tinymceScriptSrc="/tinymce/tinymce.min.js"
+          licenseKey="gpl"
           onInit={(_, instance) => { editor.current = instance as TinyEditorInstance; }}
           initialValue={post.contentHtml || "<p></p>"}
           init={{
+            license_key: "gpl",
             height: 650,
             menubar: "file edit view insert format tools table help",
             plugins: "advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount",

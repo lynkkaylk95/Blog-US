@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@tinymce/tinymce-react':
         specifier: ^6.3.0
-        version: 6.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        version: 6.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tinymce@8.0.0)
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@cloudflare/workers-types@5.20260804.1)
@@ -26,6 +26,9 @@ importers:
       sanitize-html:
         specifier: ^2.17.6
         version: 2.17.6
+      tinymce:
+        specifier: 8.0.0
+        version: 8.0.0
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.37.1
@@ -3365,6 +3368,9 @@ packages:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
 
+  tinymce@8.0.0:
+    resolution: {integrity: sha512-E1OwCXXCzmZLx6sQVeMHdb61Hsp+7AxWtYstXp7Yw59Et4AdHQ0N36n7InVaYDmq2aBlCM8qkTQYKEqKgecP3A==}
+
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
@@ -4514,11 +4520,13 @@ snapshots:
       postcss: 8.5.20
       tailwindcss: 4.2.1
 
-  '@tinymce/tinymce-react@6.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@tinymce/tinymce-react@6.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tinymce@8.0.0)':
     dependencies:
       prop-types: 15.8.1
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
+    optionalDependencies:
+      tinymce: 8.0.0
 
   '@tybys/wasm-util@0.10.3':
     dependencies:
@@ -6691,6 +6699,8 @@ snapshots:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.5)
       picomatch: 4.0.5
+
+  tinymce@8.0.0: {}
 
   to-regex-range@5.0.1:
     dependencies:
