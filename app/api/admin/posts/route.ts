@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPost, findPostBySlug, listPosts, updatePost } from "../../../../db/posts";
+import { createPost, findPostBySlug, listPosts, shiftSeriesParts, updatePost } from "../../../../db/posts";
 import { hasValidMutationOrigin, isAdminAuthenticated } from "../../../admin-auth";
 import { validatePostInput } from "../post-input";
 import { normalizeSeriesTitle } from "../../../series";
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       const existingParts = (await listPosts()).filter((post) => post.seriesTitle && normalizeSeriesTitle(post.seriesTitle) === seriesKey);
       const canonicalTitle = existingParts[0]?.seriesTitle;
       if (canonicalTitle) data = { ...data, seriesTitle: canonicalTitle };
-      if (existingParts.some((post) => post.partNumber === data.partNumber)) return NextResponse.json({ message: `Part ${data.partNumber} already exists in this series.` }, { status: 409 });
+      if (existingParts.some((post) => post.partNumber === data.partNumber)) await shiftSeriesParts(canonicalTitle || data.seriesTitle || "", data.partNumber || 1);
     }
     const deleted = await findPostBySlug(data.slug);
     if (deleted && deleted.status !== "deleted") return NextResponse.json({ message: "This slug already exists." }, { status: 409 });

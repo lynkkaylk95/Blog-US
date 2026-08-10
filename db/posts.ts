@@ -14,3 +14,7 @@ export async function createPost(value: NewPostRecord) { return (await getDb().i
 export async function updatePost(id: number, value: Partial<NewPostRecord>) { return (await getDb().update(posts).set(value).where(eq(posts.id, id)).returning())[0] ?? null; }
 export async function deletePost(id: number) { return (await getDb().update(posts).set({ status: "deleted", featured: false, updatedAt: new Date().toISOString() }).where(eq(posts.id, id)).returning())[0] ?? null; }
 export async function incrementPostViews(slug: string) { return (await getDb().update(posts).set({ views: sql`${posts.views} + 1` }).where(eq(posts.slug, slug)).returning({ views: posts.views }))[0]?.views ?? null; }
+export async function shiftSeriesParts(seriesTitle: string, fromPart: number) {
+  const affected = (await getDb().select().from(posts).where(eq(posts.seriesTitle, seriesTitle))).filter((post) => (post.partNumber || 0) >= fromPart).sort((a, b) => (b.partNumber || 0) - (a.partNumber || 0));
+  for (const post of affected) await getDb().update(posts).set({ partNumber: (post.partNumber || 0) + 1, updatedAt: new Date().toISOString() }).where(eq(posts.id, post.id));
+}
