@@ -4,7 +4,10 @@
   gap: 10px;
 }
 
-.category-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.category-picker { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 5px 8px; border: 1px solid #cad3e1; border-radius: 6px; background: #fff; }
+.category-picker:focus-within { border-color: var(--admin-blue); box-shadow: 0 0 0 3px #2f66f61a; }
+.category-picker select { flex: 1 1 180px; min-width: 150px; border: 0; outline: 0; background: transparent; padding: 7px 4px; font: inherit; }
+.category-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
 .category-chips > span { display: inline-flex; align-items: center; gap: 7px; border-radius: 18px; background: #eaf0ff; color: var(--admin-blue); padding: 7px 10px; font-size: 12px; font-weight: 700; }
 .category-chips button { border: 0; background: transparent; color: inherit; padding: 0; font-size: 17px; line-height: 1; cursor: pointer; }
 

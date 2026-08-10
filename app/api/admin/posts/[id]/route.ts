@@ -33,7 +33,9 @@ export async function PUT(request: Request, { params }: RouteProps) {
     const post = await updatePost(id, { ...data, updatedAt: now, publishedAt: data.status === "published" ? existing.publishedAt ?? now : null });
     return NextResponse.json({ post });
   } catch (error) {
-    return NextResponse.json({ message: String(error).includes("UNIQUE") ? "This slug already exists." : "Could not update the post." }, { status: 409 });
+    const detail = String(error);
+    const message = detail.includes("UNIQUE") ? "This slug already exists." : detail.includes("categories") && detail.includes("column") ? "The database needs the latest category migration before this post can be updated." : "Could not update the post.";
+    return NextResponse.json({ message }, { status: 409 });
   }
 }
 
