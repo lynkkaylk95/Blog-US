@@ -69,3 +69,7 @@ footer{padding:78px 0 28px}.footer-grid{gap:64px}.footer-grid p{font-size:16px}.
 /* Keep long story titles balanced on phone screens. */
 @media(max-width:620px){.article-hero h1{font-size:clamp(35px,9.5vw,40px);line-height:1.08;letter-spacing:-.025em;overflow-wrap:normal}}
 @media(max-width:380px){.article-hero h1{font-size:34px}}
+
+/* Two tidy category rows on wide screens; horizontal scrolling stays on mobile. */
+@media(min-width:901px){.site-header{height:auto;min-height:116px}.site-header .category-nav{max-width:760px;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:4px 24px;line-height:1.2}.site-header .category-nav a{padding:8px 0;white-space:nowrap}}
+@media(max-width:900px){.site-header .category-nav{max-width:none;flex-wrap:nowrap;justify-content:flex-start}}
