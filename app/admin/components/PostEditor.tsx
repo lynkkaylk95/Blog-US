@@ -35,7 +35,7 @@ const categories = [
   { value: "Everyday Life", label: "Everyday Life (Cuộc sống thường ngày)" },
 ];
 type EditorPost = { slug: string; title: string; excerpt: string; category: string; seriesTitle: string | null; partNumber: number | null; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
-const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0].value, seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "draft", featured: false };
+const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0].value, seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "published", featured: false };
 
 function createSlug(value: string) {
   return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

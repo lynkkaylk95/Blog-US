@@ -5,6 +5,7 @@ import { SiteFooter } from "../../components/SiteFooter";
 import { StoryCard } from "../../components/StoryCard";
 import { getPublishedStories } from "../../posts-data";
 import { authorSlug } from "../../author-utils";
+import { collapseSeriesStories } from "../../series";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -25,5 +26,6 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
 export default async function AuthorPage({ params }: AuthorPageProps) {
   const result = await getAuthor((await params).slug);
   if (!result) notFound();
-  return <main><Header /><section className="category-page shell"><span className="eyebrow">Author</span><h1>{result.author}</h1><p>{result.stories.length} {result.stories.length === 1 ? "story" : "stories"} published</p><div className="latest-grid">{result.stories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section><SiteFooter /></main>;
+  const listingStories = collapseSeriesStories(result.stories);
+  return <main><Header /><section className="category-page shell"><span className="eyebrow">Author</span><h1>{result.author}</h1><p>{listingStories.length} {listingStories.length === 1 ? "story" : "stories"} published</p><div className="latest-grid">{listingStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section><SiteFooter /></main>;
 }

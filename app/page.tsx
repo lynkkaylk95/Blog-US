@@ -5,21 +5,29 @@ import { NewsletterForm } from "./components/NewsletterForm";
 import { SiteFooter } from "./components/SiteFooter";
 import { getPublishedStories } from "./posts-data";
 import { categorySlugs } from "./content";
+import { FeaturedStoryCard } from "./components/FeaturedStoryCard";
+import { collapseSeriesStories } from "./series";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function Home() {
   const stories = await getPublishedStories();
-  const mostRead = [...stories].sort((a, b) => b.views - a.views).slice(0, 3);
+  const listingStories = collapseSeriesStories(stories);
+  const featuredStories = collapseSeriesStories(stories.filter((story) => story.featured)).slice(0, 5);
+  const mostRead = collapseSeriesStories([...stories].sort((a, b) => b.views - a.views)).slice(0, 3);
   const categoryGroups = Object.entries(categorySlugs)
-    .map(([name, slug]) => ({ name, slug, stories: stories.filter((story) => story.category === name).slice(0, 3) }))
+    .map(([name, slug]) => ({ name, slug, stories: collapseSeriesStories(stories.filter((story) => story.category === name)).slice(0, 3) }))
     .filter((group) => group.stories.length > 0)
     .slice(0, 4);
 
   return (
     <main>
       <Header />
+      {featuredStories.length > 0 && <section className="featured-stories shell" aria-labelledby="featured-stories-title">
+        <div className="featured-stories-heading"><div><span className="eyebrow">Editor&apos;s picks</span><h2 id="featured-stories-title">Featured stories</h2></div><span>{featuredStories.length} selected {featuredStories.length === 1 ? "story" : "stories"}</span></div>
+        <div className="featured-stories-list">{featuredStories.map((story) => <FeaturedStoryCard key={story.slug} story={story} />)}</div>
+      </section>}
       <section id="popular" className="popular-band popular-band--first">
         <div className="shell">
           <div className="section-heading light"><div><span className="eyebrow">Reader favorites</span><h1>Most read today</h1></div><Link href="#latest">See all stories →</Link></div>
@@ -29,7 +37,7 @@ export default async function Home() {
 
       <section id="latest" className="story-shelf shell">
         <div className="section-heading"><div><span className="eyebrow">Fresh from the porch</span><h2>Latest stories</h2></div><p>A new story, every day at 7 PM</p></div>
-        <div className="popular-grid">{stories.slice(0, 6).map((story) => <StoryCard key={story.slug} story={story} />)}</div>
+        <div className="popular-grid">{listingStories.slice(0, 6).map((story) => <StoryCard key={story.slug} story={story} />)}</div>
       </section>
 
       {categoryGroups.map((group, index) => (
