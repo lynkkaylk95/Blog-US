@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { deletePost, findPostById, updatePost } from "../../../../../db/posts";
+import { deletePost, findPostById, listPosts, updatePost } from "../../../../../db/posts";
 import { hasValidMutationOrigin, isAdminAuthenticated } from "../../../../admin-auth";
 import { validatePostInput } from "../../post-input";
+import { normalizeSeriesTitle } from "../../../../series";
 
 type RouteProps = { params: Promise<{ id: string }> };
 
@@ -21,7 +22,15 @@ export async function PUT(request: Request, { params }: RouteProps) {
   if (!result.data) return NextResponse.json({ message: result.message }, { status: 400 });
   const now = new Date().toISOString();
   try {
-    const post = await updatePost(id, { ...result.data, updatedAt: now, publishedAt: result.data.status === "published" ? existing.publishedAt ?? now : null });
+    let data = result.data;
+    if (data.seriesTitle) {
+      const seriesKey = normalizeSeriesTitle(data.seriesTitle);
+      const existingParts = (await listPosts()).filter((post) => post.id !== id && post.seriesTitle && normalizeSeriesTitle(post.seriesTitle) === seriesKey);
+      const canonicalTitle = existingParts[0]?.seriesTitle;
+      if (canonicalTitle) data = { ...data, seriesTitle: canonicalTitle };
+      if (existingParts.some((post) => post.partNumber === data.partNumber)) return NextResponse.json({ message: `Part ${data.partNumber} already exists in this series.` }, { status: 409 });
+    }
+    const post = await updatePost(id, { ...data, updatedAt: now, publishedAt: data.status === "published" ? existing.publishedAt ?? now : null });
     return NextResponse.json({ post });
   } catch (error) {
     return NextResponse.json({ message: String(error).includes("UNIQUE") ? "This slug already exists." : "Could not update the post." }, { status: 409 });

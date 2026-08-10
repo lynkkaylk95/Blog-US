@@ -4,18 +4,12 @@ import { Header } from "../../components/Header";
 import { SiteFooter } from "../../components/SiteFooter";
 import { StoryCard } from "../../components/StoryCard";
 import { getPublishedStories } from "../../posts-data";
+import { categorySlugs } from "../../content";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const categories: Record<string, string> = {
-  "family-legacy": "Family & Legacy",
-  "second-chances": "Second Chances",
-  "life-stories": "Life Stories",
-  "justice-truth": "Justice & Truth",
-  "love-after-50": "Love After 50",
-  grandparents: "Grandparents",
-};
+const categories = Object.fromEntries(Object.entries(categorySlugs).map(([name, slug]) => [slug, name]));
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

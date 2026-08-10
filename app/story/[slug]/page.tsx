@@ -14,6 +14,7 @@ import { RichStory } from "./RichStory";
 import { ViewTracker } from "./ViewTracker";
 import { authorInitials, authorSlug } from "../../author-utils";
 import { PartNavigator } from "./PartNavigator";
+import { normalizeSeriesTitle } from "../../series";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -60,7 +61,8 @@ export default async function StoryPage({ params }: StoryPageProps) {
   }
 
   const allStories = await getPublishedStories();
-  const seriesParts = story.seriesTitle ? allStories.filter((item) => item.seriesTitle === story.seriesTitle && item.partNumber).sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((item) => ({ slug: item.slug, title: item.title, partNumber: item.partNumber as number })) : [];
+  const seriesKey = story.seriesTitle ? normalizeSeriesTitle(story.seriesTitle) : "";
+  const seriesParts = story.seriesTitle ? allStories.filter((item) => item.seriesTitle && normalizeSeriesTitle(item.seriesTitle) === seriesKey && item.partNumber).sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0)).map((item) => ({ slug: item.slug, title: item.title, partNumber: item.partNumber as number })) : [];
   const sameCategoryStories = allStories.filter((item) => item.slug !== story.slug && item.category === story.category).slice(0, 3);
   const sameCategorySlugs = new Set(sameCategoryStories.map((item) => item.slug));
   const sameAuthorStories = allStories.filter((item) => item.slug !== story.slug && item.author.toLowerCase() === story.author.toLowerCase() && !sameCategorySlugs.has(item.slug)).slice(0, 3);
