@@ -1,42 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { adConfig } from "./config";
 
 export function AdSlot({ compact = false }: { compact?: boolean }) {
-  const nativeAd = adConfig.nativeAd;
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const [height, setHeight] = useState(compact ? 280 : 320);
 
   useEffect(() => {
-    if (!adConfig.enabled || !adConfig.renderSlots || compact) return;
-    if (document.querySelector(`script[data-native-ad="${nativeAd.id}"]`)) return;
+    function resizeFrame(event: MessageEvent) {
+      if (event.origin !== window.location.origin || event.source !== frameRef.current?.contentWindow) return;
+      if (event.data?.type !== "adsterra-native-resize") return;
+      const nextHeight = Number(event.data.height);
+      if (Number.isFinite(nextHeight)) setHeight(Math.min(Math.max(nextHeight, 160), 900));
+    }
 
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = nativeAd.src;
-    script.dataset.nativeAd = nativeAd.id;
-    script.setAttribute("data-cfasync", "false");
+    window.addEventListener("message", resizeFrame);
+    return () => window.removeEventListener("message", resizeFrame);
+  }, []);
 
-    const container = document.getElementById(`container-${nativeAd.id}`);
-    container?.parentElement?.insertBefore(script, container);
+  if (!adConfig.enabled) return null;
 
-    return () => script.remove();
-  }, [compact, nativeAd.id, nativeAd.src]);
-
-  if (!adConfig.enabled || !adConfig.renderSlots) return null;
-
-  if (compact) {
-    return (
-      <aside className="ad-slot ad-slot--compact" aria-label="Advertisement" data-ad-provider="adsterra">
-        <span>ADVERTISEMENT</span>
-        <div>Additional native ad placement</div>
-      </aside>
-    );
-  }
-
+  const placement = compact ? "inline" : "lead";
   return (
-    <aside className="ad-slot" aria-label="Advertisement" data-ad-provider="adsterra">
+    <aside className={`ad-slot ad-slot--native ${compact ? "ad-slot--compact" : ""}`} aria-label="Advertisement" data-ad-provider={adConfig.provider}>
       <span>ADVERTISEMENT</span>
-      <div id={`container-${nativeAd.id}`} />
+      <iframe
+        ref={frameRef}
+        src={`${adConfig.nativeAd.frameUrl}?placement=${placement}`}
+        title={`Adsterra native advertisement (${placement})`}
+        loading="lazy"
+        scrolling="no"
+        style={{ height }}
+      />
     </aside>
   );
 }

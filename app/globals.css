@@ -59,3 +59,9 @@ footer{padding:78px 0 28px}.footer-grid{gap:64px}.footer-grid p{font-size:16px}.
 .newsletter--inline{position:static;background:#fff;color:var(--ink);border-top:4px solid var(--wine);padding:32px 36px;box-shadow:var(--shadow-soft)}.newsletter--inline label{margin-top:0}.newsletter--inline .form-message--success{color:var(--green)}.newsletter--inline .form-message--error{color:#a12743}
 @media(max-width:900px){.story-shelf.shell{width:min(100% - 40px,1220px)}.newsletter-band__inner{grid-template-columns:1fr;gap:30px}.newsletter--inline{max-width:none}}
 @media(max-width:620px){.popular-band--first{padding-top:46px}.popular-band--first .section-heading h1{font-size:36px}.story-shelf{padding:58px 0}.story-shelf.shell{width:min(100% - 32px,1220px)}.story-shelf .story-image-wrap{height:260px}.story-shelf .popular-grid{row-gap:40px}.newsletter-band{padding:58px 0}.newsletter-band__inner{gap:24px}.newsletter-band h2{font-size:36px}.newsletter--inline{padding:26px 22px}}
+
+/* Responsive, isolated Adsterra Native placements */
+.ad-slot.ad-slot--native{height:auto;min-height:220px;display:block;padding:12px;overflow:hidden;background:#fff}
+.ad-slot.ad-slot--native>span{display:block;text-align:center;margin:0 0 10px;color:#8b8580}
+.ad-slot.ad-slot--native iframe{display:block;width:100%;min-height:160px;border:0;overflow:hidden;background:transparent}
+.ad-slot.ad-slot--native.ad-slot--compact{height:auto}

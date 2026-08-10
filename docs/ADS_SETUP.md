@@ -13,14 +13,13 @@ file unless Monetag provides a replacement.
 `app/ads/config.ts` controls the active provider, whether ads are enabled, and
 the provider scripts. Monetag verification does not require ads to be enabled.
 
-The active Monetag MultiTag uses zone `268748`. Its global script and attributes
-are declared in `app/ads/config.ts`, and the replacement HTTPS service worker is
-published from `public/sw.js`.
+Monetag has been disabled and removed. `public/sw.js` now only unregisters the
+previous Monetag service worker and clears its caches.
 
-The primary story-page ad slot uses Adsterra Native unit
-`fa440f56b6e1471dc9cd83adbf2d7820`. Adsterra supplies a fixed HTML container ID,
-so this unit is rendered only once per page. Compact placements remain reserved
-until separate Native unit codes are supplied for them.
+Story-page ad slots use Adsterra Native unit
+`fa440f56b6e1471dc9cd83adbf2d7820`. Each placement is isolated in its own local
+frame so Adsterra's fixed container ID cannot break the page layout. Separate
+Adsterra codes are still recommended for accurate placement statistics.
 
 To replace this setup with another zone or provider:
 
