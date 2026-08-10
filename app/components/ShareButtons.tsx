@@ -21,9 +21,7 @@ export function ShareButtons({ title }: { title: string }) {
   }
 
   function email() {
-    const subject = encodeURIComponent(title);
-    const body = encodeURIComponent(`I thought you might enjoy this story:\n\n${window.location.href}`);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    window.location.href = "/#newsletter";
   }
 
   return (
