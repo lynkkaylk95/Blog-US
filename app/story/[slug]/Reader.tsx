@@ -5,7 +5,7 @@ import type { Chapter } from "../../content";
 import { AdSlot } from "../../components/AdSlot";
 import { InlineRecommendations, type InlineRecommendation } from "../../components/InlineRecommendations";
 
-export function Reader({ chapters, recommendations, category }: { chapters: Chapter[]; recommendations: InlineRecommendation[]; category: string }) {
+export function Reader({ chapters, recommendations, category, showEnd = true }: { chapters: Chapter[]; recommendations: InlineRecommendation[]; category: string; showEnd?: boolean }) {
   const [fontSize, setFontSize] = useState(22);
   const [theme, setTheme] = useState<"paper" | "cream" | "night">("paper");
   const [settings, setSettings] = useState(false);
@@ -46,7 +46,7 @@ export function Reader({ chapters, recommendations, category }: { chapters: Chap
             {i === 2 && <AdSlot compact />}
             {i === Math.floor((chapters.length - 1) / 2) && <InlineRecommendations stories={recommendations} category={category} />}
           </section>)}
-          <div className="story-end">THE END</div>
+          {showEnd && <div className="story-end">THE END</div>}
           <section className="reaction-box">
             <span className="eyebrow">Your turn</span>
             <h2>How did this story make you feel?</h2>
