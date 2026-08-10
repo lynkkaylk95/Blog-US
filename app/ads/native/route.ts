@@ -1,4 +1,4 @@
-<!doctype html>
+const html = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -10,7 +10,7 @@
     </style>
   </head>
   <body>
-    <script async="async" data-cfasync="false" src="https://pl30777481.effectivecpmnetwork.com/fa440f56b6e1471dc9cd83adbf2d7820/invoke.js"></script>
+    <script async="async" data-cfasync="false" src="https://pl30777481.effectivecpmnetwork.com/fa440f56b6e1471dc9cd83adbf2d7820/invoke.js"><\/script>
     <div id="container-fa440f56b6e1471dc9cd83adbf2d7820"></div>
     <script>
       (() => {
@@ -23,6 +23,16 @@
         setTimeout(reportHeight, 500);
         setTimeout(reportHeight, 2000);
       })();
-    </script>
+    <\/script>
   </body>
-</html>
+</html>`;
+
+export async function GET() {
+  return new Response(html, {
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "public, max-age=300",
+      "x-content-type-options": "nosniff",
+    },
+  });
+}
