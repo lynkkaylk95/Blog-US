@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deletePost, findPostById, listPosts, updatePost } from "../../../../../db/posts";
+import { deletePost, findPostById, listPosts, moveSeriesPart, updatePost } from "../../../../../db/posts";
 import { hasValidMutationOrigin, isAdminAuthenticated } from "../../../../admin-auth";
 import { validatePostInput } from "../../post-input";
 import { normalizeSeriesTitle } from "../../../../series";
@@ -28,7 +28,12 @@ export async function PUT(request: Request, { params }: RouteProps) {
       const existingParts = (await listPosts()).filter((post) => post.id !== id && post.seriesTitle && normalizeSeriesTitle(post.seriesTitle) === seriesKey);
       const canonicalTitle = existingParts[0]?.seriesTitle;
       if (canonicalTitle) data = { ...data, seriesTitle: canonicalTitle };
-      if (existingParts.some((post) => post.partNumber === data.partNumber)) return NextResponse.json({ message: `Part ${data.partNumber} already exists in this series.` }, { status: 409 });
+      const sameSeries = Boolean(existing.seriesTitle && normalizeSeriesTitle(existing.seriesTitle) === seriesKey);
+      if (sameSeries && existing.partNumber && data.partNumber !== existing.partNumber) {
+        const maxPosition = existingParts.length + 1;
+        if ((data.partNumber || 0) > maxPosition) return NextResponse.json({ message: `Part number must be between 1 and ${maxPosition}.` }, { status: 400 });
+        await moveSeriesPart(id, canonicalTitle || data.seriesTitle || existing.seriesTitle || "", existing.partNumber, data.partNumber || 1);
+      } else if (existingParts.some((post) => post.partNumber === data.partNumber)) return NextResponse.json({ message: `Part ${data.partNumber} already exists in this series.` }, { status: 409 });
     }
     const post = await updatePost(id, { ...data, updatedAt: now, publishedAt: data.status === "published" ? existing.publishedAt ?? now : null });
     return NextResponse.json({ post });
