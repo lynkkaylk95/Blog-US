@@ -13,9 +13,12 @@ export function AdManager() {
       if (document.querySelector(`script[data-ad-script="${configuredScript.id}"]`)) continue;
 
       const script = document.createElement("script");
-      script.async = true;
+      script.async = configuredScript.async ?? true;
       script.src = configuredScript.src;
       script.dataset.adScript = configuredScript.id;
+      for (const [name, value] of Object.entries(configuredScript.attributes ?? {})) {
+        script.setAttribute(name, value);
+      }
       (configuredScript.location === "head" ? document.head : document.body).appendChild(script);
       addedScripts.push(script);
     }

@@ -1,7 +1,7 @@
 import { adConfig } from "./config";
 
 export function AdSlot({ compact = false }: { compact?: boolean }) {
-  if (!adConfig.enabled && !adConfig.showPlaceholders) return null;
+  if (!adConfig.enabled || !adConfig.renderSlots) return null;
 
   return (
     <aside
