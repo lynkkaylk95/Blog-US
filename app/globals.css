@@ -65,3 +65,7 @@ footer{padding:78px 0 28px}.footer-grid{gap:64px}.footer-grid p{font-size:16px}.
 .ad-slot.ad-slot--native>span{display:block;text-align:center;margin:0 0 10px;color:#8b8580}
 .ad-slot.ad-slot--native iframe{display:block;width:100%;min-height:160px;border:0;overflow:hidden;background:transparent}
 .ad-slot.ad-slot--native.ad-slot--compact{height:auto}
+
+/* Keep long story titles balanced on phone screens. */
+@media(max-width:620px){.article-hero h1{font-size:clamp(35px,9.5vw,40px);line-height:1.08;letter-spacing:-.025em;overflow-wrap:normal}}
+@media(max-width:380px){.article-hero h1{font-size:34px}}
