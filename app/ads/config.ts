@@ -4,7 +4,12 @@ export type AdProvider = "monetag" | "custom" | "none";
 export const adConfig = {
   provider: "monetag" as AdProvider,
   enabled: true,
-  renderSlots: false,
+  renderSlots: true,
+  nativeAd: {
+    provider: "adsterra",
+    id: "fa440f56b6e1471dc9cd83adbf2d7820",
+    src: "https://pl30777481.effectivecpmnetwork.com/fa440f56b6e1471dc9cd83adbf2d7820/invoke.js",
+  },
   scripts: [
     {
       id: "monetag-multitag-268748",

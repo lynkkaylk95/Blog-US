@@ -17,6 +17,11 @@ The active Monetag MultiTag uses zone `268748`. Its global script and attributes
 are declared in `app/ads/config.ts`, and the replacement HTTPS service worker is
 published from `public/sw.js`.
 
+The primary story-page ad slot uses Adsterra Native unit
+`fa440f56b6e1471dc9cd83adbf2d7820`. Adsterra supplies a fixed HTML container ID,
+so this unit is rendered only once per page. Compact placements remain reserved
+until separate Native unit codes are supplied for them.
+
 To replace this setup with another zone or provider:
 
 1. Replace the entries in `scripts`.
