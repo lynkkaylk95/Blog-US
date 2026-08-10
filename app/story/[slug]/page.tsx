@@ -89,8 +89,8 @@ export default async function StoryPage({ params }: StoryPageProps) {
     <Header />
     <article className="article-hero shell">
       <div className="breadcrumbs"><Link href="/">Home</Link><span>›</span><Link href={`/category/${categorySlugs[story.category]}`}>{story.category}</Link></div>
-      <span className={`eyebrow${story.seriesTitle ? " series-heading" : ""}`}>{story.seriesTitle ? `${story.seriesTitle} · Part ${story.partNumber} of ${seriesParts.length}` : story.category}</span>
-      <h1>{story.title}</h1>
+      <span className={`eyebrow${story.seriesTitle ? " series-heading" : ""}`}>{story.seriesTitle || story.category}</span>
+      <h1>{story.seriesTitle ? `Part ${story.partNumber}: ${story.title}` : story.title}</h1>
       <div className="article-byline"><div className="author-avatar">{authorInitials(story.author)}</div><div><b>By <Link href={`/author/${authorSlug(story.author)}`}>{story.author}</Link></b><span>{story.date} · {story.readTime} · <ViewTracker slug={story.slug} initialViews={story.views} /></span>{story.updatedDate !== story.date && <span>Updated {story.updatedDate}</span>}</div><ShareButtons title={story.title} /></div>
     </article>
     <div className="article-image"><Image src={story.image} alt={story.title} fill priority unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) 100vw, 1100px" /></div>
