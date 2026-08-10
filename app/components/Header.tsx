@@ -24,7 +24,10 @@ export function Header() {
           <Link href="/category/plot-twists">Plot Twists</Link>
           <Link href="/#popular">Most Read</Link>
         </nav>
-        <Link href="/#newsletter" className="header-button">Join free <span>→</span></Link>
+        <div className="header-actions">
+          <Link href="/search" className="search-button" aria-label="Search stories"><span aria-hidden="true">⌕</span><b>Search</b></Link>
+          <Link href="/#newsletter" className="header-button">Join free <span>→</span></Link>
+        </div>
       </header>
     </>
   );
