@@ -49,9 +49,9 @@ type TinyEditorInstance = {
   uploadImages(): Promise<unknown>;
 };
 
-export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = "", initialPartNumber = 1 }: { postId?: number; seriesMode?: boolean; initialSeriesTitle?: string; initialPartNumber?: number }) {
+export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = "", initialPartNumber = 1, initialCategories = ["Series"], initialAuthor = "Porchlight Editors", initialImageUrl = "" }: { postId?: number; seriesMode?: boolean; initialSeriesTitle?: string; initialPartNumber?: number; initialCategories?: string[]; initialAuthor?: string; initialImageUrl?: string }) {
   const { t } = useAdminLocale();
-  const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: "Series", categories: ["Series"], seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber) } : emptyPost);
+  const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: initialCategories[0] || "Series", categories: initialCategories.includes("Series") ? initialCategories : ["Series", ...initialCategories], seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber), author: initialAuthor, imageUrl: initialImageUrl } : emptyPost);
   const [loading, setLoading] = useState(Boolean(postId)); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [message, setMessage] = useState("");
   const editor = useRef<TinyEditorInstance | null>(null);
   const featuredUpload = useRef<HTMLInputElement>(null);
@@ -93,7 +93,7 @@ export function PostEditor({ postId, seriesMode = false, initialSeriesTitle = ""
     catch (error) { setMessage(error instanceof Error ? error.message : t("uploadFailed")); setSaving(false); return; }
     const current = { ...post, contentHtml: editor.current?.getContent() || post.contentHtml };
     const response = await fetch(postId ? `/api/admin/posts/${postId}` : "/api/admin/posts", { method: postId ? "PUT" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(current) }); const result = await response.json() as { message?: string };
-    if (response.ok && shouldAddNext && isSeries) { const query = new URLSearchParams({ seriesTitle: post.seriesTitle || "", partNumber: String((post.partNumber || 1) + 1) }); window.location.href = `/admin/series/new?${query}`; }
+    if (response.ok && shouldAddNext && isSeries) { const query = new URLSearchParams({ seriesTitle: post.seriesTitle || "", partNumber: String((post.partNumber || 1) + 1), categories: JSON.stringify(post.categories), author: post.author, imageUrl: post.imageUrl }); window.location.href = `/admin/series/new?${query}`; }
     else if (response.ok) window.location.href = "/admin"; else { setMessage(result.message || t("saveFailed")); setSaving(false); }
   }
   if (loading) return <main className="admin-main"><div className="admin-notice">{t("loadingEditor")}</div></main>;
