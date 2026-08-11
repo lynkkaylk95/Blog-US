@@ -7,6 +7,7 @@ import { BackToTop } from "./components/BackToTop";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  referrer: "no-referrer-when-downgrade",
   title: { default: "Porchlight Stories — Stories Worth Slowing Down For", template: "%s | Porchlight Stories" },
   description: siteDescription,
   applicationName: siteName,
