@@ -2,6 +2,7 @@ import Link from "next/link";
 import { categorySlug, storyCategories } from "../categories";
 
 export function Header() {
+  const menuCategories = storyCategories.filter((value) => value !== "Life Stories");
   return (
     <>
       <div className="top-note">Stories worth slowing down for — new every evening</div>
@@ -11,10 +12,19 @@ export function Header() {
           <span><strong>Porchlight</strong><small>STORIES</small></span>
         </Link>
         <nav className="category-nav" aria-label="Main navigation">
-          <Link href="/#latest">Latest</Link>
-          {storyCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`}>{value}</Link>)}
-          <Link href="/category/series">Series</Link>
-          <Link href="/#popular">Most Read</Link>
+          <div className="featured-nav">
+            <Link href="/category/series">Series</Link>
+            <Link href="/#popular">Most Read</Link>
+            <Link href="/#latest">Latest</Link>
+            <Link href="/category/life-stories">Life Stories</Link>
+          </div>
+          <details className="category-menu">
+            <summary><span className="menu-icon" aria-hidden="true"><i /><i /><i /></span><span>Categories</span></summary>
+            <div className="category-menu__panel">
+              <strong>Explore categories</strong>
+              <div>{menuCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`}>{value}</Link>)}</div>
+            </div>
+          </details>
         </nav>
         <div className="header-actions">
           <Link href="/search" className="search-button" aria-label="Search stories"><span aria-hidden="true">⌕</span><b>Search</b></Link>
