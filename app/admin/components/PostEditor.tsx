@@ -5,8 +5,9 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
+import { categorySlug, storyCategories } from "../../categories";
 
-const categories = [
+const categoryLabels = [
   { value: "Family & Legacy", label: "Family & Legacy (Gia đình & Di sản)" },
   { value: "Second Chances", label: "Second Chances (Cơ hội thứ hai)" },
   { value: "Life Stories", label: "Life Stories (Những câu chuyện cuộc sống)" },
@@ -34,11 +35,12 @@ const categories = [
   { value: "Life Lessons", label: "Life Lessons (Bài học cuộc sống)" },
   { value: "Everyday Life", label: "Everyday Life (Cuộc sống thường ngày)" },
 ];
+const categories = storyCategories.map((value) => ({ value, label: categoryLabels.find((item) => item.value === value)?.label || value }));
 type EditorPost = { slug: string; title: string; excerpt: string; category: string; categories: string[]; seriesTitle: string | null; partNumber: number | null; imageUrl: string; imageAlt: string; contentHtml: string; readTime: string; author: string; status: "draft" | "published"; featured: boolean };
 const emptyPost: EditorPost = { slug: "", title: "", excerpt: "", category: categories[0].value, categories: [categories[0].value], seriesTitle: null, partNumber: null, imageUrl: "", imageAlt: "", contentHtml: "<p><br></p>", readTime: "5", author: "Porchlight Editors", status: "published", featured: false };
 
 function createSlug(value: string) {
-  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return categorySlug(value);
 }
 
 function readTimeMinutes(value: string) { return value.match(/\d+/)?.[0] || ""; }
