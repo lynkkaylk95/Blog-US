@@ -1,20 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 import { categorySlug, storyCategories } from "../categories";
 
 export function Header() {
   const menuCategories = storyCategories.filter((value) => value !== "Life Stories");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function closeMenu(event: MouseEvent) { if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false); }
-    function closeOnEscape(event: KeyboardEvent) { if (event.key === "Escape") setMenuOpen(false); }
-    document.addEventListener("mousedown", closeMenu);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => { document.removeEventListener("mousedown", closeMenu); document.removeEventListener("keydown", closeOnEscape); };
-  }, []);
   return (
     <>
       <div className="top-note">Stories worth slowing down for — new every evening</div>
@@ -30,13 +18,13 @@ export function Header() {
             <Link href="/#latest">Latest</Link>
             <Link href="/category/life-stories">Life Stories</Link>
           </div>
-          <div className={`category-menu${menuOpen ? " category-menu--open" : ""}`} ref={menuRef}>
-            <button type="button" aria-expanded={menuOpen} aria-controls="category-menu-panel" onClick={() => setMenuOpen((open) => !open)}><span className="menu-icon" aria-hidden="true"><i /><i /><i /></span><span>Categories</span></button>
-            <div className="category-menu__panel" id="category-menu-panel" hidden={!menuOpen}>
+          <details className="category-menu">
+            <summary><span className="menu-icon" aria-hidden="true"><i /><i /><i /></span><span>Categories</span></summary>
+            <div className="category-menu__panel">
               <strong>Explore categories</strong>
-              <div>{menuCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`} onClick={() => setMenuOpen(false)}>{value}</Link>)}</div>
+              <div>{menuCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`}>{value}</Link>)}</div>
             </div>
-          </div>
+          </details>
         </nav>
         <div className="header-actions">
           <Link href="/search" className="search-button" aria-label="Search stories"><span aria-hidden="true">⌕</span><b>Search</b></Link>
