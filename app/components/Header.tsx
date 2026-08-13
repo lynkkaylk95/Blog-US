@@ -25,12 +25,20 @@ export function Header() {
               <div>{menuCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`}>{value}</Link>)}</div>
             </div>
           </details>
+          <a className="mobile-category-trigger" href="#mobile-categories"><span className="menu-icon" aria-hidden="true"><i /><i /><i /></span><span>Categories</span></a>
         </nav>
         <div className="header-actions">
           <Link href="/search" className="search-button" aria-label="Search stories"><span aria-hidden="true">⌕</span><b>Search</b></Link>
           <Link href="/#newsletter" className="header-button">Join free <span>→</span></Link>
         </div>
       </header>
+      <aside className="mobile-categories" id="mobile-categories" aria-label="Categories menu">
+        <a className="mobile-categories__backdrop" href="#" aria-label="Close categories menu" />
+        <div className="mobile-categories__sheet">
+          <div className="mobile-categories__head"><strong>Explore categories</strong><a href="#" aria-label="Close categories menu">×</a></div>
+          <div>{menuCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`}>{value}</Link>)}</div>
+        </div>
+      </aside>
     </>
   );
 }
