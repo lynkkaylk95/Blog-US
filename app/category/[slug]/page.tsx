@@ -6,7 +6,7 @@ import { StoryCard } from "../../components/StoryCard";
 import { SeriesCard } from "../../components/SeriesCard";
 import { getPublishedStories } from "../../posts-data";
 import { categorySlugs } from "../../content";
-import { normalizeSeriesTitle } from "../../series";
+import { collapseSeriesStories, normalizeSeriesTitle } from "../../series";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -25,6 +25,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   if (!category) notFound();
   const stories = await getPublishedStories();
   const categoryStories = stories.filter((story) => story.categories.includes(category));
+  const listingStories = collapseSeriesStories(categoryStories);
   const series = slug === "series" ? [...categoryStories.reduce((groups, story) => {
     if (!story.seriesTitle) return groups;
     const key = normalizeSeriesTitle(story.seriesTitle);
@@ -34,8 +35,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     return groups;
   }, new Map<string, typeof categoryStories>()).values()].map((parts) => {
     const ordered = parts.sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0));
-    return { story: ordered[0], partCount: ordered.length };
-  }) : [];
+    const firstPart = ordered.find((story) => story.partNumber === 1);
+    return firstPart ? { story: firstPart, partCount: ordered.length } : null;
+  }).filter((item): item is NonNullable<typeof item> => item !== null) : [];
 
-  return <main><Header /><section className="category-page shell"><span className="eyebrow">Browse by theme</span><h1>{category}</h1><p>{slug === "series" ? "Discover complete story series and start reading from the beginning." : "Thoughtful stories about the moments that shape a life."}</p><div className="latest-grid">{slug === "series" ? series.map(({ story, partCount }) => <SeriesCard key={normalizeSeriesTitle(story.seriesTitle || story.title)} story={story} partCount={partCount} />) : categoryStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section><SiteFooter /></main>;
+  return <main><Header /><section className="category-page shell"><span className="eyebrow">Browse by theme</span><h1>{category}</h1><p>{slug === "series" ? "Discover complete story series and start reading from the beginning." : "Thoughtful stories about the moments that shape a life."}</p><div className="latest-grid">{slug === "series" ? series.map(({ story, partCount }) => <SeriesCard key={normalizeSeriesTitle(story.seriesTitle || story.title)} story={story} partCount={partCount} />) : listingStories.map((story) => <StoryCard key={story.slug} story={story} />)}</div></section><SiteFooter /></main>;
 }

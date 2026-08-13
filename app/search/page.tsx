@@ -3,6 +3,7 @@ import { Header } from "../components/Header";
 import { SiteFooter } from "../components/SiteFooter";
 import { StoryCard } from "../components/StoryCard";
 import { getPublishedStories } from "../posts-data";
+import { collapseSeriesStories } from "../series";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -18,10 +19,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const query = q.trim().slice(0, 120);
   const terms = query.toLocaleLowerCase("en-US").split(/\s+/).filter(Boolean);
   const stories = await getPublishedStories();
-  const results = terms.length ? stories.filter((story) => {
+  const results = terms.length ? collapseSeriesStories(stories.filter((story) => {
     const searchable = [story.title, story.excerpt, story.author, ...story.categories, story.seriesTitle || ""].join(" ").toLocaleLowerCase("en-US");
     return terms.every((term) => searchable.includes(term));
-  }) : [];
+  })) : [];
 
   return (
     <main>

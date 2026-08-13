@@ -3,11 +3,13 @@ import { categorySlugs } from "./content";
 import { getPublishedStories } from "./posts-data";
 import { absoluteUrl } from "./site";
 import { authorSlug } from "./author-utils";
+import { collapseSeriesStories } from "./series";
 
 export const revalidate = 0;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const stories = await getPublishedStories();
+  const listingStories = collapseSeriesStories(stories);
   const latestStoryDate = new Date(Math.max(...stories.map((story) => Date.parse(story.updatedAt))));
   const staticPages = ["", "/about", "/editorial-standards", "/contact", "/privacy", "/terms", "/cookies"];
   const pages: MetadataRoute.Sitemap = staticPages.map((path) => ({
@@ -22,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly",
     priority: 0.7,
   }));
-  const storyPages: MetadataRoute.Sitemap = stories.map((story) => ({
+  const storyPages: MetadataRoute.Sitemap = listingStories.map((story) => ({
     url: absoluteUrl(`/story/${story.slug}`),
     lastModified: new Date(story.updatedAt),
     changeFrequency: "monthly",

@@ -1,5 +1,6 @@
 import { getPublishedStories } from "../posts-data";
 import { absoluteUrl, siteDescription, siteName } from "../site";
+import { collapseSeriesStories } from "../series";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,7 +12,8 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
-  const stories = await getPublishedStories();
+  const allStories = await getPublishedStories();
+  const stories = collapseSeriesStories(allStories);
   const items = stories.map((story) => {
     const url = absoluteUrl(`/story/${story.slug}`);
     return `<item>

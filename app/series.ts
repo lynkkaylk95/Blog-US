@@ -2,14 +2,18 @@ export function normalizeSeriesTitle(value: string) {
   return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
 }
 
+export function isPublicListingStory(story: { seriesTitle?: string | null; partNumber?: number | null }) {
+  return !story.seriesTitle || story.partNumber === 1;
+}
+
 export function collapseSeriesStories<T extends { seriesTitle?: string | null; partNumber?: number | null }>(stories: T[]) {
   const emitted = new Set<string>();
-  return stories.flatMap((story) => {
-    if (!story.seriesTitle) return [story];
+  return stories.filter((story) => {
+    if (!isPublicListingStory(story)) return false;
+    if (!story.seriesTitle) return true;
     const key = normalizeSeriesTitle(story.seriesTitle);
-    if (emitted.has(key)) return [];
+    if (emitted.has(key)) return false;
     emitted.add(key);
-    const firstPart = stories.filter((item) => item.seriesTitle && normalizeSeriesTitle(item.seriesTitle) === key).sort((a, b) => (a.partNumber || 0) - (b.partNumber || 0))[0];
-    return firstPart ? [firstPart] : [];
+    return true;
   });
 }
