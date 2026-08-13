@@ -11,6 +11,9 @@ export function HilltopVideoSlider() {
 
   useEffect(() => {
     if (pathname.startsWith("/admin")) return;
+    // The third-party slider can place a transparent click-capturing layer over
+    // mobile pages. Keep it off touch-sized screens so navigation remains usable.
+    if (window.matchMedia("(max-width: 900px)").matches) return;
     if (document.querySelector('script[data-hilltop-video-slider="true"]')) return;
 
     const script = document.createElement("script") as HTMLScriptElement & {
