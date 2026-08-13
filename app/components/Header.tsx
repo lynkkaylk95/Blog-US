@@ -36,7 +36,7 @@ export function Header() {
         <a className="mobile-categories__backdrop" href="#" aria-label="Close categories menu" />
         <div className="mobile-categories__sheet">
           <div className="mobile-categories__head"><strong>Explore categories</strong><a href="#" aria-label="Close categories menu">×</a></div>
-          <div>{menuCategories.map((value) => <Link key={value} href={`/category/${categorySlug(value)}`}>{value}</Link>)}</div>
+          <div>{menuCategories.map((value) => <a key={value} href={`/category/${categorySlug(value)}#top`}>{value}</a>)}</div>
         </div>
       </aside>
     </>
