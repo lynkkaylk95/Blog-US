@@ -4,10 +4,15 @@ import { getDb } from "../../../../db";
 import { createPasswordHash } from "../../../../db/admin-credentials";
 import { adminUsers } from "../../../../db/schema";
 import { hasValidMutationOrigin, isAdminAuthenticated } from "../../../admin-auth";
+import { primaryAdminUsername } from "../../../../db/admin-authentication";
 
 export async function GET() {
   if (!await isAdminAuthenticated()) return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
-  const users = await getDb().select({ id: adminUsers.id, name: adminUsers.name, email: adminUsers.email, active: adminUsers.active, createdAt: adminUsers.createdAt }).from(adminUsers).orderBy(asc(adminUsers.name));
+  const additionalUsers = await getDb().select({ id: adminUsers.id, name: adminUsers.name, email: adminUsers.email, active: adminUsers.active, createdAt: adminUsers.createdAt }).from(adminUsers).where(eq(adminUsers.active, true)).orderBy(asc(adminUsers.name));
+  const users = [
+    { id: "primary-admin", name: primaryAdminUsername, email: null, active: true, createdAt: null, role: "owner", deletable: false },
+    ...additionalUsers.map((user) => ({ ...user, role: "manager", deletable: true })),
+  ];
   return NextResponse.json({ users });
 }
 
