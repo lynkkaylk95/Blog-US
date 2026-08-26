@@ -42,8 +42,8 @@ export function Reader({ chapters, recommendations, category, showEnd = true }: 
             <div className="chapter-kicker">CHAPTER {i + 1} OF {chapters.length}</div>
             <h2>{chapter.title}</h2>
             {chapter.paragraphs.map((p, index) => <p key={index}>{p}</p>)}
-            {i === 0 && <AdSlot compact />}
-            {i === 2 && <AdSlot compact />}
+            {i === 0 && <AdSlot compact placement="inline" />}
+            {i === 2 && <AdSlot compact placement="inline" />}
             {i === Math.floor((chapters.length - 1) / 2) && <InlineRecommendations stories={recommendations} category={category} />}
           </section>)}
           {showEnd && <div className="story-end">THE END</div>}

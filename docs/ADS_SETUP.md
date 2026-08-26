@@ -16,17 +16,21 @@ the provider scripts. Monetag verification does not require ads to be enabled.
 Monetag has been disabled and removed. `public/sw.js` now only unregisters the
 previous Monetag service worker and clears its caches.
 
-Story-page ad slots use Adsterra Native unit
-`fa440f56b6e1471dc9cd83adbf2d7820`. Each placement is isolated in its own local
-frame so Adsterra's fixed container ID cannot break the page layout. Separate
-Adsterra codes are still recommended for accurate placement statistics.
+Story-page ad slots are configured independently in `app/ads/config.ts` as
+`lead`, `inline`, and `end`. Each placement is isolated in its own local frame,
+which reports `filled`, `no-fill`, or `error` to the page. A no-fill or provider
+failure collapses the slot automatically, so it cannot leave a blank ad region.
 
-To replace this setup with another zone or provider:
+The current zone ID is retained in all three entries until separate Adsterra
+Native zones are created. Once available, replace the `zoneId` of `lead` and
+`end` (and `inline` if desired) individually. This gives placement-level
+reporting and frequency controls without changing any page component.
 
-1. Replace the entries in `scripts`.
-2. Update any provider-specific script attributes.
-3. Set `renderSlots` to `true` only for providers that use the website's inline
-   ad positions.
+To replace a zone or provider:
+
+1. Update the matching entry under `nativeAds` in `app/ads/config.ts`.
+2. Keep the provider-specific loading logic inside `app/ads/native/route.ts`.
+3. Preserve its fill/error messages so empty slots continue to collapse.
 
 To pause advertising, set `enabled` to `false`. To switch networks, replace the
 entries in `scripts` and change `provider`; page-level ad placements do not need
