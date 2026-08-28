@@ -31,10 +31,7 @@ export function GoogleAnalytics({ measurementId }: { measurementId?: string }) {
   useEffect(() => {
     if (!measurementId) return;
     initializeGoogleAnalytics(measurementId);
-  }, [measurementId]);
-
-  useEffect(() => {
-    if (!measurementId || !window.gtag) return;
+    if (!window.gtag) return;
     const page = pathname;
     if (page === lastPage.current) return;
     lastPage.current = page;
