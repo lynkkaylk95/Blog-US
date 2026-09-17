@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { analyzeSeries, prepareSeries } from "../app/api/admin/series-input";
+import { analyzeSeries, prepareSeries, splitSeries } from "../app/api/admin/series-input";
 
 test("splits formatted chapters into titles and separate bodies without losing the introduction", () => {
   const parts = analyzeSeries('<p>Introduction.</p><h2><strong>Chapter 1: The &amp; beginning</strong></h2><p>First <em>body</em>.</p><h3>Chapter 2: The return</h3><p>Second body.</p>', { removeIntro: false });
@@ -55,8 +55,8 @@ test("rejects missing, duplicate, skipped, out-of-order and empty chapters", () 
 test("creates ordinary series post inputs, sanitizes content and calculates per-part reading times", () => {
   const parts = prepareSeries({ seriesTitle: "A New Story", categories: ["Life Stories"], author: "A Writer", imageUrl: "https://example.com/cover.jpg", status: "published", featured: true, contentHtml: `<h2>Chapter 1: Beginning</h2><p onclick="bad()">${"word ".repeat(401)}</p><script>alert(1)</script><h2>Chapter 2: End</h2><p>Short ending.</p>` });
   assert.equal(parts.length, 2);
-  assert.equal(parts[0].slug, "a-new-story-part-1-beginning");
-  assert.equal(parts[1].slug, "a-new-story-part-2-end");
+  assert.equal(parts[0].slug, "beginning");
+  assert.equal(parts[1].slug, "end");
   assert.equal(parts[0].readTime, "3 min read");
   assert.equal(parts[1].readTime, "1 min read");
   for (const part of parts) {
@@ -66,6 +66,43 @@ test("creates ordinary series post inputs, sanitizes content and calculates per-
     assert.deepEqual(JSON.parse(part.categories), ["Series", "Life Stories"]);
     assert.doesNotMatch(part.contentHtml, /script|onclick|alert/);
   }
+});
+
+test("extraction leaves only intro and moves complete chapter bodies, not excerpts", () => {
+  const firstBody = `<p>${"Long chapter text. ".repeat(60)}<strong>Final sentence.</strong></p>`;
+  const result = splitSeries(`<div><p>Intro only.</p><h2>Chapter 1: First</h2>${firstBody}<h2>Chapter 2: Second</h2><p>Second body.</p></div>`);
+  assert.equal(result.introHtml, "<div><p>Intro only.</p></div>");
+  assert.equal(result.parts[0].contentHtml, `<div>${firstBody}</div>`);
+  assert.equal(result.parts[1].contentHtml, "<div><p>Second body.</p></div>");
+  assert.doesNotMatch(result.parts[0].contentHtml, /Intro only|Second body/);
+  assert.equal(splitSeries('<h2>Chapter 1: First</h2><p>Body.</p>').introHtml, "");
+});
+
+test("saves extracted parts separately and applies intro only once when requested", () => {
+  const split = splitSeries('<p>Original intro.</p><h2>Chapter 1: Một cái tên</h2><p>First body.</p><h2>Chapter 2: Return</h2><p>Second body.</p>');
+  const input = { seriesTitle: "Series", author: "Writer", imageUrl: "https://example.com/cover.jpg", ...split, introHtml: '<p>Edited intro.</p><script>alert(1)</script>' };
+  const withoutIntro = prepareSeries(input);
+  assert.equal(withoutIntro[0].slug, "mot-cai-ten");
+  assert.equal(withoutIntro[1].slug, "return");
+  assert.doesNotMatch(withoutIntro[0].contentHtml, /intro/i);
+  const withIntro = prepareSeries({ ...input, removeIntro: false });
+  assert.equal(withIntro[0].contentHtml, "<p>Edited intro.</p><p>First body.</p>");
+  assert.equal(withIntro[1].contentHtml, "<p>Second body.</p>");
+  assert.doesNotMatch(split.parts[0].contentHtml, /intro/i);
+  assert.equal(prepareSeries({ ...input, introHtml: "", removeIntro: false })[0].contentHtml, "<p>First body.</p>");
+});
+
+test("validates extracted parts and rejects title-only slug collisions", () => {
+  const input = { seriesTitle: "Series", author: "Writer", imageUrl: "https://example.com/cover.jpg", introHtml: "" };
+  const valid = { partNumber: 1, title: "A title", contentHtml: "<p>Body.</p>" };
+  for (const parts of [[], null, [{ ...valid, partNumber: 2 }], [{ ...valid, contentHtml: "" }], [{ ...valid, title: "!!!" }]]) {
+    assert.throws(() => prepareSeries({ ...input, parts }));
+  }
+  assert.throws(() => prepareSeries({ ...input, parts: [valid, { ...valid, partNumber: 2, title: "Á title!" }] }), /slug/);
+  const sanitized = prepareSeries({ ...input, parts: [{ ...valid, contentHtml: '<p onclick="bad()">Body.</p><script>alert(1)</script>', slug: "forged-slug", words: 99999, readTime: "999 min read" }] });
+  assert.equal(sanitized[0].slug, "a-title");
+  assert.equal(sanitized[0].readTime, "1 min read");
+  assert.equal(sanitized[0].contentHtml, "<p>Body.</p>");
 });
 
 test("validates shared fields before any writes", () => {

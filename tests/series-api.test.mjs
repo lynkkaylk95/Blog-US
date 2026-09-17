@@ -12,8 +12,9 @@ test("series analysis, atomic creation, page navigation, conflicts and access co
   const cookie = `porchlight_admin=${expires}.${signature}`;
   const headers = { "content-type": "application/json", origin: baseUrl, cookie };
   const send = (path, body, overrides = {}) => fetch(`${baseUrl}${path}`, { method: "POST", headers, body: JSON.stringify(body), ...overrides });
-  const title = `Series integration ${Date.now()}`;
-  const contentHtml = '<p>Introduction to the story.</p><h2>Chapter 1: Arrival</h2><p>First chapter unique text.</p><h2>Chapter 2: Discovery</h2><p>Second chapter unique text.</p><h2>Chapter 3: Home</h2><p>Third chapter unique text.</p>';
+  const runId = Date.now();
+  const title = `Series integration ${runId}`;
+  const contentHtml = `<p>Introduction to the story.</p><h2>Chapter 1: Arrival ${runId}</h2><p>First chapter unique text.</p><h2>Chapter 2: Discovery ${runId}</h2><p>Second chapter unique text.</p><h2>Chapter 3: Home ${runId}</h2><p>Third chapter unique text.</p>`;
   const payload = { seriesTitle: title, contentHtml, author: "Test Writer", categories: ["Life Stories"], imageUrl: "https://example.com/cover.jpg", status: "published" };
   const rows = async () => (await (await fetch(`${baseUrl}/api/admin/posts`, { headers: { cookie } })).json()).posts;
   try {
@@ -23,18 +24,25 @@ test("series analysis, atomic creation, page navigation, conflicts and access co
     }
     const analysis = await send("/api/admin/series/analyze", { contentHtml });
     assert.equal(analysis.status, 200);
-    assert.deepEqual((await analysis.json()).parts.map((part) => part.title), ["Arrival", "Discovery", "Home"]);
+    const extracted = await analysis.json();
+    assert.deepEqual(extracted.parts.map((part) => part.title), [`Arrival ${runId}`, `Discovery ${runId}`, `Home ${runId}`]);
+    assert.equal(extracted.introHtml, "<p>Introduction to the story.</p>");
+    assert.equal(extracted.parts[0].contentHtml, "<p>First chapter unique text.</p>");
     assert.equal((await rows()).filter((post) => post.seriesTitle === title).length, 0);
     const invalid = await send("/api/admin/series", { ...payload, contentHtml: contentHtml.replace("Chapter 2", "Chapter 4") });
     assert.equal(invalid.status, 400);
     assert.equal((await rows()).filter((post) => post.seriesTitle === title).length, 0);
 
-    const created = await send("/api/admin/series", payload);
+    const splitPayload = { ...payload, contentHtml: extracted.introHtml, ...extracted };
+    const created = await send("/api/admin/series", splitPayload);
     const result = await created.json();
     assert.equal(created.status, 201, JSON.stringify(result));
     assert.equal(result.count, 3);
     const saved = (await rows()).filter((post) => post.seriesTitle === title).sort((a, b) => a.partNumber - b.partNumber);
     assert.equal(saved.length, 3);
+    assert.equal(saved[0].slug, `arrival-${runId}`);
+    assert.equal(saved[1].slug, `discovery-${runId}`);
+    assert.equal(saved[2].slug, `home-${runId}`);
     for (const [index, part] of saved.entries()) {
       assert.equal(part.partNumber, index + 1);
       assert.equal(part.author, payload.author);
@@ -50,7 +58,12 @@ test("series analysis, atomic creation, page navigation, conflicts and access co
     assert.equal((await send("/api/admin/series", payload)).status, 409);
     assert.equal((await rows()).filter((post) => post.seriesTitle === title).length, 3);
 
-    const racePayload = { ...payload, seriesTitle: `${title} concurrent`, status: "draft", removeIntro: false };
+    const conflict = await send("/api/admin/series", { ...splitPayload, seriesTitle: `${title} other` });
+    assert.equal(conflict.status, 409);
+    assert.match((await conflict.json()).message, new RegExp(`arrival-${runId}`));
+    assert.equal((await rows()).filter((post) => post.seriesTitle === `${title} other`).length, 0);
+
+    const racePayload = { ...splitPayload, parts: extracted.parts.map((part) => ({ ...part, title: `${part.title} draft` })), seriesTitle: `${title} concurrent`, status: "draft", removeIntro: false };
     const concurrent = await Promise.all([send("/api/admin/series", racePayload), send("/api/admin/series", racePayload)]);
     assert.deepEqual(concurrent.map((response) => response.status).sort(), [201, 409]);
     const drafts = (await rows()).filter((post) => post.seriesTitle === racePayload.seriesTitle);

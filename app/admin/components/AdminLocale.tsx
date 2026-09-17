@@ -5,11 +5,13 @@ export type AdminLocale = "en" | "vi";
 
 const translations = {
   en: {
+    showPartContent: "Show content", hidePartContent: "Hide content", characters: "characters", characterCountHint: "Chapter body characters, including spaces; HTML and the chapter title are excluded. Whitespace is normalized.",
     bulkSeriesDescription: "Paste the full story, analyze its chapters, then save each part as a separate page.",
     fullStoryContent: "Full story content", chapterFormatHint: "Put each heading on its own line: Chapter 1: Chapter title. Number chapters consecutively from 1. Content before Chapter 1 is the intro.",
-    removeIntro: "Remove intro", removeIntroHint: "Checked by default: exclude content before Chapter 1 when saving. Uncheck to keep the intro at the beginning of Part 1. The text in the editor is unchanged.",
+    removeIntro: "Remove intro", removeIntroHint: "Checked by default: exclude the intro when saving. Uncheck to keep it at the beginning of Part 1.",
+    introContent: "Intro", chaptersMovedHint: "The chapters have been moved to the parts below. Only the intro remains here. To edit chapter content, merge the parts back into the editor, edit, then analyze again.", restoreChapters: "Merge back to edit chapters",
     analyzeChapters: "Analyze chapters", analyzingChapters: "Analyzing chapters…", analysisFailed: "Could not analyze chapters.",
-    chaptersFound: "Found {count} parts. Review the list before saving.", analyzeBeforeSave: "Analyze chapters before saving. After changing the content or intro option, analyze it again.",
+    chaptersFound: "Moved the full content into {count} parts. Review them before saving.", analyzeBeforeSave: "Analyze chapters before saving.",
     seriesSharedDetails: "Each part uses the series author, cover image, categories and publication status. Reading time is calculated for each part.", wordCount: "words", saveSeries: "Save series",
     addSeries: "Add series", series: "Series", newSeriesPart: "Add series part", seriesEditorDescription: "Create a connected series one part at a time.", partName: "Part name", currentPart: "Part being added", addNextPart: "Save & add Part {part}",
     seriesTitle: "Series title", partNumber: "Part number",
@@ -21,11 +23,13 @@ const translations = {
     system: "System", settingsDescription: "Configuration is managed securely through Cloudflare environment variables.", requiredConfiguration: "Required configuration", d1Binding: "D1 binding", sessionSecret: "Session signing secret", canonicalWebsite: "Canonical website", secretNote: "Secrets are never displayed in the browser. Change them from the Cloudflare dashboard.", usersDescription: "View and manage everyone who can access the website administration area.", addUser: "Add user", name: "Name", email: "Email", userAdded: "User added successfully.", userList: "Website managers", noUsers: "No website managers found.", primaryAdmin: "Primary administrator", deleteUserConfirm: "Delete this user? They will no longer be able to sign in.", changePassword: "Change password", currentPassword: "Current password", accountEmailOptional: "Account email (leave blank for primary admin)", passwordChanged: "Password changed successfully.",
   },
   vi: {
+    showPartContent: "Xem nội dung", hidePartContent: "Thu gọn nội dung", characters: "ký tự", characterCountHint: "Số ký tự nội dung chương, gồm khoảng trắng; không tính mã HTML và tên chương. Khoảng trắng được chuẩn hóa.",
     bulkSeriesDescription: "Nhập toàn bộ truyện, phân tích chương rồi lưu mỗi part thành một trang riêng.",
     fullStoryContent: "Nội dung toàn bộ truyện", chapterFormatHint: "Đặt mỗi tiêu đề trên một dòng riêng: Chapter 1: Tên chương. Đánh số liên tục từ 1. Phần nội dung trước Chapter 1 là intro.",
-    removeIntro: "Loại bỏ intro", removeIntroHint: "Mặc định được tick: bỏ phần trước Chapter 1 khi lưu. Bỏ tick để giữ intro ở đầu part 1. Nội dung trong ô soạn thảo vẫn được giữ nguyên.",
+    removeIntro: "Loại bỏ intro", removeIntroHint: "Mặc định được tick: bỏ intro khi lưu. Bỏ tick để giữ intro ở đầu part 1.",
+    introContent: "Intro", chaptersMovedHint: "Nội dung các chương đã được chuyển xuống từng part bên dưới. Ô này chỉ còn intro. Để sửa nội dung chương, gộp các part lại vào ô soạn thảo, chỉnh sửa rồi phân tích lại.", restoreChapters: "Gộp lại để sửa các chương",
     analyzeChapters: "Phân tích chương", analyzingChapters: "Đang phân tích chương…", analysisFailed: "Không thể phân tích chương.",
-    chaptersFound: "Đã tìm thấy {count} part. Kiểm tra danh sách trước khi lưu.", analyzeBeforeSave: "Phân tích chương trước khi lưu. Nếu sửa nội dung hoặc tùy chọn intro, hãy phân tích lại.",
+    chaptersFound: "Đã chuyển toàn bộ nội dung vào {count} part. Kiểm tra trước khi lưu.", analyzeBeforeSave: "Phân tích chương trước khi lưu.",
     seriesSharedDetails: "Mỗi part dùng chung tác giả, ảnh đại diện, danh mục và trạng thái xuất bản của series. Thời gian đọc được tính riêng cho từng part.", wordCount: "từ", saveSeries: "Lưu series",
     addSeries: "Thêm series", series: "Series", newSeriesPart: "Thêm part cho series", seriesEditorDescription: "Tạo series theo từng part được liên kết với nhau.", partName: "Tên riêng của part", currentPart: "Part đang thêm", addNextPart: "Lưu và thêm Part {part}",
     seriesTitle: "Tên series", partNumber: "Số part",

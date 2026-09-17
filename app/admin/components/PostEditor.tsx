@@ -47,18 +47,24 @@ function readTimeMinutes(value: string) { return value.match(/\d+/)?.[0] || ""; 
 
 type TinyEditorInstance = {
   getContent(): string;
+  setContent(html: string): void;
+  undoManager: { clear(): void };
   insertContent(html: string): void;
   uploadImages(): Promise<unknown>;
 };
-type AnalyzedPart = { partNumber: number; title: string; words: number; readTime: string; preview: string };
+type AnalyzedPart = { partNumber: number; title: string; contentHtml: string; characters: number; words: number; readTime: string; preview: string };
+
+function escapeHtml(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 
 export function PostEditor({ postId, seriesMode = false, manualSeriesPart = false, initialSeriesTitle = "", initialPartNumber = 1, initialCategories = ["Series"], initialAuthor = "Porchlight Editors", initialImageUrl = "" }: { postId?: number; seriesMode?: boolean; manualSeriesPart?: boolean; initialSeriesTitle?: string; initialPartNumber?: number; initialCategories?: string[]; initialAuthor?: string; initialImageUrl?: string }) {
-  const { t } = useAdminLocale();
+  const { t, locale } = useAdminLocale();
   const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: initialCategories[0] || "Series", categories: initialCategories.includes("Series") ? initialCategories : ["Series", ...initialCategories], seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber), author: initialAuthor, imageUrl: initialImageUrl } : emptyPost);
   const [loading, setLoading] = useState(Boolean(postId)); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [message, setMessage] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [removeIntro, setRemoveIntro] = useState(true);
-  const [analysis, setAnalysis] = useState<{ source: string; removeIntro: boolean; parts: AnalyzedPart[] } | null>(null);
+  const [analysis, setAnalysis] = useState<{ parts: AnalyzedPart[] } | null>(null);
   const editor = useRef<TinyEditorInstance | null>(null);
   const featuredUpload = useRef<HTMLInputElement>(null);
 
@@ -68,10 +74,9 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
   function removeCategory(value: string) { setPost((current) => { const selected = current.categories.filter((item) => item !== value); return { ...current, category: selected[0] || "", categories: selected }; }); }
   const isSeries = seriesMode || post.categories.includes("Series");
   const isBulkSeries = isSeries && !postId && !manualSeriesPart;
-  function seriesSlug(current: EditorPost, title: string) { return createSlug(`${current.seriesTitle || "series"}-part-${current.partNumber || 1}-${title}`); }
-  function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: isSeries ? seriesSlug(current, title) : createSlug(title) })); }
-  function seriesTitleChanged(seriesTitle: string) { setPost((current) => ({ ...current, seriesTitle, slug: seriesSlug({ ...current, seriesTitle }, current.title) })); }
-  function partNumberChanged(partNumber: number) { setPost((current) => ({ ...current, partNumber, slug: postId ? current.slug : seriesSlug({ ...current, partNumber }, current.title) })); }
+  function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: createSlug(title) })); }
+  function seriesTitleChanged(seriesTitle: string) { set("seriesTitle", seriesTitle); }
+  function partNumberChanged(partNumber: number) { set("partNumber", partNumber); }
   async function uploadFile(file: Blob, progress?: (percent: number) => void) {
     const data = new FormData(); data.set("file", file); progress?.(10);
     const response = await fetch("/api/admin/upload", { method: "POST", body: data });
@@ -95,19 +100,34 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
     finally { setUploading(false); }
   }
   async function analyzeChapters() {
-    if (saving || analyzing || uploading) return;
-    setAnalyzing(true); setMessage(""); setAnalysis(null);
+    if (saving || analyzing || uploading || analysis) return;
+    setAnalyzing(true); setMessage("");
     try {
       await editor.current?.uploadImages();
-      const source = editor.current?.getContent() || post.contentHtml;
-      const response = await fetch("/api/admin/series/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contentHtml: source, removeIntro }) });
+      const source = editor.current?.getContent() ?? post.contentHtml;
+      const response = await fetch("/api/admin/series/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contentHtml: source }) });
       if (response.status === 401) { window.location.href = "/admin/login"; return; }
-      const result = await response.json() as { parts?: AnalyzedPart[]; message?: string };
-      if (!response.ok || !result.parts?.length) throw new Error(result.message || t("analysisFailed"));
-      if ((editor.current?.getContent() || post.contentHtml) !== source) throw new Error(t("analyzeBeforeSave"));
-      setAnalysis({ source, removeIntro, parts: result.parts });
+      const result = await response.json() as { introHtml?: string; parts?: AnalyzedPart[]; message?: string };
+      if (!response.ok || !result.parts?.length || typeof result.introHtml !== "string") throw new Error(result.message || t("analysisFailed"));
+      if ((editor.current?.getContent() ?? post.contentHtml) !== source) throw new Error(t("analyzeBeforeSave"));
+      replaceSource(result.introHtml);
+      setAnalysis({ parts: result.parts });
     } catch (error) { setMessage(error instanceof Error ? error.message : t("analysisFailed")); }
     finally { setAnalyzing(false); }
+  }
+  function replaceSource(html: string) {
+    editor.current?.setContent(html);
+    // Undo must not put the extracted chapters back into the intro as duplicates.
+    editor.current?.undoManager.clear();
+    set("contentHtml", html);
+  }
+  function restoreChapters() {
+    if (!analysis || saving || analyzing || uploading) return;
+    const intro = editor.current?.getContent() ?? post.contentHtml;
+    const chapters = analysis.parts.map((part) => `<h2>Chapter ${part.partNumber}: ${escapeHtml(part.title)}</h2>${part.contentHtml}`).join("");
+    replaceSource(intro + chapters);
+    setAnalysis(null);
+    setMessage("");
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -116,11 +136,9 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
     const shouldAddNext = ((event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value === "add-next";
     try {
       await editor.current?.uploadImages();
-      const current = { ...post, contentHtml: editor.current?.getContent() || post.contentHtml, ...(isBulkSeries ? { removeIntro } : {}) };
-      if (isBulkSeries && (!analysis || analysis.source !== current.contentHtml || analysis.removeIntro !== removeIntro)) {
-        setAnalysis(null);
-        throw new Error(t("analyzeBeforeSave"));
-      }
+      if (isBulkSeries && !analysis) throw new Error(t("analyzeBeforeSave"));
+      const contentHtml = editor.current?.getContent() ?? post.contentHtml;
+      const current = { ...post, contentHtml, ...(isBulkSeries ? { removeIntro, introHtml: contentHtml, parts: analysis!.parts } : {}) };
       const endpoint = postId ? `/api/admin/posts/${postId}` : isBulkSeries ? "/api/admin/series" : "/api/admin/posts";
       const response = await fetch(endpoint, { method: postId ? "PUT" : "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(current) });
       if (response.status === 401) { window.location.href = "/admin/login"; return; }
@@ -150,15 +168,15 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
         <div className="field"><label>{t("status")}</label><select value={post.status} onChange={(event) => set("status", event.target.value as EditorPost["status"])}><option value="draft">{t("draft")}</option><option value="published">{t("published")}</option></select></div>
         <label className="admin-check"><input type="checkbox" checked={post.featured} onChange={(event) => set("featured", event.target.checked)} /> {t("featuredHomepage")}</label>
       </section>
-      <section className="admin-panel rich-panel"><div className="rich-label">{isBulkSeries ? t("fullStoryContent") : t("storyContent")} *</div>
-        {isBulkSeries && <p className="series-analysis-help">{t("chapterFormatHint")}</p>}
+      <section className="admin-panel rich-panel"><div className="rich-label">{isBulkSeries ? analysis ? t("introContent") : t("fullStoryContent") : t("storyContent")}{!isBulkSeries || !analysis ? " *" : ""}</div>
+        {isBulkSeries && <p className="series-analysis-help">{analysis ? t("chaptersMovedHint") : t("chapterFormatHint")}</p>}
         {uploading && <div className="upload-progress" role="status">{t("uploading")}</div>}
         <Editor
+          id="story-source-editor"
           tinymceScriptSrc="/tinymce/tinymce.min.js"
           licenseKey="gpl"
           disabled={saving || analyzing}
           onInit={(_, instance) => { editor.current = instance as TinyEditorInstance; }}
-          onEditorChange={(html) => { setAnalysis((current) => current && current.source !== html ? null : current); }}
           initialValue={post.contentHtml || "<p></p>"}
           init={{
             height: 650,
@@ -195,15 +213,22 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
         />
       </section>
       {isBulkSeries && <section className="admin-panel series-analysis" aria-busy={analyzing}>
-        <label className="admin-check"><input type="checkbox" checked={removeIntro} disabled={saving || uploading || analyzing} onChange={(event) => { setRemoveIntro(event.target.checked); setAnalysis(null); }} aria-describedby="series-intro-help" />{t("removeIntro")}</label>
+        <label className="admin-check"><input type="checkbox" checked={removeIntro} disabled={saving || uploading || analyzing} onChange={(event) => setRemoveIntro(event.target.checked)} aria-describedby="series-intro-help" />{t("removeIntro")}</label>
         <p id="series-intro-help">{t("removeIntroHint")}</p>
-        <button type="button" className="admin-primary" disabled={saving || uploading || analyzing} onClick={analyzeChapters}>{analyzing ? t("analyzingChapters") : t("analyzeChapters")}</button>
+        {analysis ? <button type="button" className="admin-primary" disabled={saving || uploading || analyzing} onClick={restoreChapters}>{t("restoreChapters")}</button> : <button type="button" className="admin-primary" disabled={saving || uploading || analyzing} onClick={analyzeChapters}>{analyzing ? t("analyzingChapters") : t("analyzeChapters")}</button>}
         <p role="status">{analysis ? t("chaptersFound", { count: analysis.parts.length }) : t("analyzeBeforeSave")}</p>
         {analysis && <><p>{t("seriesSharedDetails")}</p><ol className="series-part-preview">{analysis.parts.map((part) => <li key={part.partNumber}>
           <strong>Part {part.partNumber}: {part.title}</strong>
-          <small>{part.words} {t("wordCount")} · {part.readTime}</small>
-          <p>{part.preview}</p>
-          <code>/story/{createSlug(`${post.seriesTitle || "series"}-part-${part.partNumber}-${part.title}`)}</code>
+          <label className="series-part-title">{t("partName")}<input aria-label={`${t("partName")} ${part.partNumber}`} required value={part.title} disabled={saving || analyzing} onChange={(event) => setAnalysis((current) => current ? { parts: current.parts.map((item) => item.partNumber === part.partNumber ? { ...item, title: event.target.value } : item) } : null)} /></label>
+          <code>/story/{createSlug(part.title)}</code>
+          <details className="series-part-details">
+            <summary aria-controls={`series-part-content-${part.partNumber}`}>
+              <span className="series-part-show">{t("showPartContent")}</span>
+              <span className="series-part-hide">{t("hidePartContent")}</span>
+              <span className="series-part-characters" title={t("characterCountHint")}>{part.characters.toLocaleString(locale === "vi" ? "vi-VN" : "en-US")} {t("characters")}</span>
+            </summary>
+            <div id={`series-part-content-${part.partNumber}`} className="series-part-content" dangerouslySetInnerHTML={{ __html: part.contentHtml }} />
+          </details>
         </li>)}</ol></>}
       </section>}
       {message && <div className="admin-error" role="alert">{message}</div>}<div className="editor-actions"><Link href="/admin">{t("cancel")}</Link><button className="admin-primary" disabled={saving || uploading || analyzing || (isBulkSeries && !analysis)}>{saving ? t("saving") : isBulkSeries ? t("saveSeries") : post.status === "published" ? t("publishPost") : t("saveDraft")}</button>{isSeries && !isBulkSeries && <button className="admin-primary admin-primary--next" type="submit" value="add-next" disabled={saving || uploading}>{t("addNextPart", { part: (post.partNumber || 1) + 1 })}</button>}</div>

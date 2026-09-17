@@ -5,7 +5,7 @@ import { sanitizePostHtml, validatePostInput, type PostInput } from "./post-inpu
 
 const blockTags = new Set(["p", "div", "h2", "h3", "h4", "blockquote", "ul", "ol", "li", "figure", "figcaption"]);
 const chapterPattern = /^Chapter\s+(\d+)\s*:\s*(.+)$/i;
-export type SeriesPart = { partNumber: number; title: string; contentHtml: string; words: number; readTime: string; preview: string };
+export type SeriesPart = { partNumber: number; title: string; contentHtml: string; characters: number; words: number; readTime: string; preview: string };
 
 function copyElement(node: Element, children: ChildNode[]) {
   return new Element(node.name, { ...node.attribs }, children);
@@ -46,7 +46,7 @@ function normalizeLines(nodes: ChildNode[]): ChildNode[] {
   });
 }
 
-export function analyzeSeries(content: unknown, { removeIntro = true }: { removeIntro?: boolean } = {}): SeriesPart[] {
+export function splitSeries(content: unknown): { introHtml: string; parts: SeriesPart[] } {
   if (typeof content !== "string" || !content.trim()) throw new Error("Nhập toàn bộ truyện trước khi phân tích. / Enter the full story first.");
   const nodes = normalizeLines(parseDocument(sanitizePostHtml(content)).children);
   const parts: SeriesPart[] = [];
@@ -69,7 +69,7 @@ export function analyzeSeries(content: unknown, { removeIntro = true }: { remove
           throw new Error(`Sai thứ tự chương: cần Chapter ${parts.length + 1}, gặp Chapter ${match[1]}. / Chapters must be consecutive, starting at 1.`);
         }
         current = parts.length;
-        parts.push({ partNumber, title: match[2].trim(), contentHtml: "", words: 0, readTime: "", preview: "" });
+        parts.push({ partNumber, title: match[2].trim(), contentHtml: "", characters: 0, words: 0, readTime: "", preview: "" });
       } else if (leaf && /^Chapter\s+\d+\s*:/i.test(text)) {
         throw new Error(`Chapter ${parts.length + 1} thiếu tên chương. / A chapter title is required after the colon.`);
       } else if (isTag(node) && node.children.some(containsBlock)) {
@@ -86,20 +86,42 @@ export function analyzeSeries(content: unknown, { removeIntro = true }: { remove
   for (const [index, children] of groups) {
     if (index >= 0) parts[index].contentHtml = DomUtils.getOuterHTML(children);
   }
-  // Everything before Chapter 1 is the intro; keep it only when requested.
-  const introduction = DomUtils.getOuterHTML(groups.get(-1) || []);
+  const introHtml = DomUtils.getOuterHTML(groups.get(-1) || []);
+  return { introHtml, parts: validateParts(parts) };
+}
+
+function validateParts(value: unknown): SeriesPart[] {
+  if (!Array.isArray(value) || !value.length) throw new Error("Chưa có part nào được phân tích. / No analyzed parts.");
+  const parts = value.map((value, index) => {
+    if (!value || typeof value !== "object") throw new Error("Invalid part data.");
+    const part = value as Record<string, unknown>;
+    if (part.partNumber !== index + 1) throw new Error(`Cần Part ${index + 1}. / Parts must be consecutive, starting at 1.`);
+    if (typeof part.title !== "string" || !part.title.trim()) throw new Error(`Part ${index + 1}: thiếu tên. / Missing title.`);
+    if (typeof part.contentHtml !== "string") throw new Error(`Part ${index + 1}: thiếu nội dung. / Missing content.`);
+    return { partNumber: index + 1, title: part.title.trim(), contentHtml: sanitizePostHtml(part.contentHtml), characters: 0, words: 0, readTime: "", preview: "" };
+  });
   for (const part of parts) {
     const text = DomUtils.innerText(parseDocument(part.contentHtml).children).replace(/\s+/g, " ").trim();
     if (!text) throw new Error(`Chapter ${part.partNumber} chưa có nội dung. / Chapter ${part.partNumber} has no content.`);
   }
-  if (!removeIntro) parts[0].contentHtml = introduction + parts[0].contentHtml;
+  return updatePartStats(parts);
+}
+
+function updatePartStats(parts: SeriesPart[]) {
   for (const part of parts) {
     const text = DomUtils.innerText(parseDocument(part.contentHtml).children).replace(/\s+/g, " ").trim();
+    part.characters = Array.from(text.normalize("NFC")).length;
     part.words = text.split(/\s+/).length;
     part.readTime = `${Math.max(1, Math.ceil(part.words / 200))} min read`;
     part.preview = text.slice(0, 180);
   }
   return parts;
+}
+
+export function analyzeSeries(content: unknown, { removeIntro = true }: { removeIntro?: boolean } = {}): SeriesPart[] {
+  const { introHtml, parts } = splitSeries(content);
+  if (!removeIntro) parts[0].contentHtml = introHtml + parts[0].contentHtml;
+  return updatePartStats(parts);
 }
 
 export function prepareSeries(value: unknown): PostInput[] {
@@ -108,10 +130,24 @@ export function prepareSeries(value: unknown): PostInput[] {
   const seriesTitle = typeof input.seriesTitle === "string" ? input.seriesTitle.trim() : "";
   if (!seriesTitle || seriesTitle.length > 160) throw new Error("Tên series phải có 1–160 ký tự. / Series title must contain 1–160 characters.");
   const categories = Array.isArray(input.categories) ? [...new Set(["Series", ...input.categories])] : ["Series"];
-  return analyzeSeries(input.contentHtml, { removeIntro: input.removeIntro !== false }).map((part) => {
+  let parts: SeriesPart[];
+  if ("parts" in input) {
+    parts = validateParts(input.parts);
+    if (typeof input.introHtml !== "string") throw new Error("Invalid intro data.");
+    if (input.removeIntro === false) parts[0].contentHtml = sanitizePostHtml(input.introHtml) + parts[0].contentHtml;
+    updatePartStats(parts);
+  } else {
+    parts = analyzeSeries(input.contentHtml, { removeIntro: input.removeIntro !== false });
+  }
+  const slugs = new Set<string>();
+  return parts.map((part) => {
+    const slug = categorySlug(part.title);
+    if (!slug) throw new Error(`Part ${part.partNumber}: tên không tạo được slug. / The title must contain letters or numbers usable in a URL.`);
+    if (slugs.has(slug)) throw new Error(`Part ${part.partNumber}: slug "${slug}" bị trùng. Hãy đổi tên part. / Duplicate part title URL.`);
+    slugs.add(slug);
     const result = validatePostInput({
       ...input, ...part, seriesTitle, categories, category: "Series",
-      slug: categorySlug(`${seriesTitle}-part-${part.partNumber}-${part.title}`),
+      slug,
     });
     if (!result.data) throw new Error(`Chapter ${part.partNumber}: ${result.message}`);
     return result.data;

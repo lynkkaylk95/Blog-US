@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { hasValidMutationOrigin, isAdminAuthenticated } from "../../../../admin-auth";
-import { analyzeSeries } from "../../series-input";
+import { splitSeries } from "../../series-input";
 
 export async function POST(request: Request) {
   if (!await isAdminAuthenticated()) return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
   if (!await hasValidMutationOrigin()) return NextResponse.json({ message: "Invalid request origin." }, { status: 403 });
   try {
-    const input = await request.json() as { contentHtml?: unknown; removeIntro?: unknown } | null;
-    const parts = analyzeSeries(input?.contentHtml, { removeIntro: input?.removeIntro !== false }).map(({ partNumber, title, words, readTime, preview }) => ({ partNumber, title, words, readTime, preview }));
-    return NextResponse.json({ parts });
+    const input = await request.json() as { contentHtml?: unknown } | null;
+    return NextResponse.json(splitSeries(input?.contentHtml));
   } catch (error) {
     return NextResponse.json({ message: error instanceof Error ? error.message : "Could not analyze chapters." }, { status: 400 });
   }

@@ -17,7 +17,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Series này đã tồn tại. Hãy sửa các part trong danh sách bài viết hoặc dùng tên series khác. / This series already exists." }, { status: 409 });
     }
     const slugs = new Set(existing.map((post) => post.slug));
-    if (parts.some((part) => slugs.has(part.slug))) return NextResponse.json({ message: "Một đường dẫn part đã tồn tại. / A part URL already exists." }, { status: 409 });
+    const conflict = parts.find((part) => slugs.has(part.slug));
+    if (conflict) return NextResponse.json({ message: `Slug "${conflict.slug}" đã tồn tại. Hãy đổi tên part "${conflict.title}". / This part URL already exists; change its title.` }, { status: 409 });
     const now = new Date().toISOString();
     const created = await createSeriesPosts(parts.map((part) => ({ ...part, createdAt: now, updatedAt: now, publishedAt: part.status === "published" ? now : null })));
     return NextResponse.json({ count: created.length, posts: created.map(({ id, slug, title, partNumber }) => ({ id, slug, title, partNumber })) }, { status: 201 });

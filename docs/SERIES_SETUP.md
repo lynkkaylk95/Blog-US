@@ -1,8 +1,8 @@
 # Create a series from a full story
 
 Open **Admin → Add series**, enter the series title and shared metadata, then paste
-the full story into the content editor. There are no part-name or part-number
-fields in this workflow.
+the full story into the content editor. Part names and numbers are extracted
+automatically from the chapter headings.
 
 Put each chapter heading on its own line, as a heading or a paragraph:
 
@@ -14,14 +14,26 @@ Chapter 2: Discovery
 The second chapter's content…
 ```
 
-Click **Analyze chapters** below the editor. The preview shows each part's number,
-title, word count, reading time, content excerpt and generated URL. Chapters must
-be consecutive, starting at 1, with a nonempty title and body. Content before
-Chapter 1 is the intro. **Remove intro** is checked by default, so only chapter
-content is saved. Uncheck it to keep the intro at the beginning of Part 1; it
-never creates a separate intro page. The full text stays in the editor. Editing
-the content or changing this option invalidates the preview; analyze again
-before saving. Preview excerpts, word counts and reading times reflect the option.
+Click **Analyze chapters** below the editor. The complete chapter bodies move
+into separate parts below; only the intro before Chapter 1 stays in the original
+editor. Every part shows its generated URL and character count. Click **Show
+content** to expand the full formatted body, and click again to collapse it.
+Parts start collapsed and can be opened independently. The character count
+includes spaces in the chapter body, with whitespace normalized; it excludes
+HTML, the chapter title and the separate intro. Chapters
+must be consecutive, starting at 1, with a nonempty title and body.
+
+**Remove intro** is checked by default, so only chapter content is saved. Uncheck
+it to prepend the current intro to Part 1; no separate intro page is created.
+The intro and this option can be changed after extraction without losing parts.
+To edit chapter content, use **Merge back to edit chapters**, edit the full story,
+then analyze again. Merging preserves the current intro and part names.
+
+Slugs use only the part title: `Chapter 1: The Return` becomes `/story/the-return`.
+They do not include the series title or part number. Part names can be corrected
+in the generated list. If two names produce the same slug, or an existing post
+already uses it, saving is blocked with a message asking for a different name.
+No suffix is added automatically and existing posts are not renamed.
 
 **Save series** creates all parts in one D1 batch transaction. Each part inherits
 the author, image, categories, featured setting and draft/published status. The
