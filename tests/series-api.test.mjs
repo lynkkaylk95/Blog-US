@@ -46,15 +46,16 @@ test("series analysis, atomic creation, page navigation, conflicts and access co
       for (const sibling of saved) assert.ok(html.includes(sibling.slug), "Series navigation must link all parts.");
     }
     assert.doesNotMatch(saved[0].contentHtml, /Second chapter|Third chapter/);
-    assert.match(saved[0].contentHtml, /Introduction/);
+    assert.doesNotMatch(saved[0].contentHtml, /Introduction/);
     assert.equal((await send("/api/admin/series", payload)).status, 409);
     assert.equal((await rows()).filter((post) => post.seriesTitle === title).length, 3);
 
-    const racePayload = { ...payload, seriesTitle: `${title} concurrent`, status: "draft" };
+    const racePayload = { ...payload, seriesTitle: `${title} concurrent`, status: "draft", removeIntro: false };
     const concurrent = await Promise.all([send("/api/admin/series", racePayload), send("/api/admin/series", racePayload)]);
     assert.deepEqual(concurrent.map((response) => response.status).sort(), [201, 409]);
     const drafts = (await rows()).filter((post) => post.seriesTitle === racePayload.seriesTitle);
     assert.equal(drafts.length, 3);
+    assert.match(drafts.find((post) => post.partNumber === 1).contentHtml, /Introduction/);
     assert.equal((await fetch(`${baseUrl}/story/${drafts[0].slug}`)).status, 404);
   } finally {
     const testPosts = (await rows()).filter((post) => [title, `${title} concurrent`].includes(post.seriesTitle));

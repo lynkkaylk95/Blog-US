@@ -3,7 +3,7 @@ import test from "node:test";
 import { analyzeSeries, prepareSeries } from "../app/api/admin/series-input";
 
 test("splits formatted chapters into titles and separate bodies without losing the introduction", () => {
-  const parts = analyzeSeries('<p>Introduction.</p><h2><strong>Chapter 1: The &amp; beginning</strong></h2><p>First <em>body</em>.</p><h3>Chapter 2: The return</h3><p>Second body.</p>');
+  const parts = analyzeSeries('<p>Introduction.</p><h2><strong>Chapter 1: The &amp; beginning</strong></h2><p>First <em>body</em>.</p><h3>Chapter 2: The return</h3><p>Second body.</p>', { removeIntro: false });
   assert.deepEqual(parts.map(({ partNumber, title }) => ({ partNumber, title })), [{ partNumber: 1, title: "The & beginning" }, { partNumber: 2, title: "The return" }]);
   assert.match(parts[0].contentHtml, /Introduction/);
   assert.match(parts[0].contentHtml, /<em>body<\/em>/);
@@ -71,4 +71,26 @@ test("creates ordinary series post inputs, sanitizes content and calculates per-
 test("validates shared fields before any writes", () => {
   assert.throws(() => prepareSeries({ seriesTitle: "", contentHtml: '<p>Chapter 1: One</p><p>Body.</p>' }));
   assert.throws(() => prepareSeries({ seriesTitle: "Story", contentHtml: '<p>Chapter 1: One</p><p>Body.</p>', imageUrl: "bad", author: "Writer" }));
+});
+
+test("intro option applies consistently to previews, reading time and saved parts", () => {
+  const contentHtml = `<div><p>${"Intro ".repeat(401)}</p><img src="https://example.com/intro.jpg"><h2>Chapter 1: One</h2><p>First body.</p><h2>Chapter 2: Two</h2><p>Second body.</p></div>`;
+  const payload = { seriesTitle: "Story", contentHtml, author: "Writer", imageUrl: "https://example.com/cover.jpg" };
+  for (const removeIntro of [undefined, true, false]) {
+    const analyzed = analyzeSeries(contentHtml, { removeIntro });
+    const saved = prepareSeries({ ...payload, removeIntro });
+    assert.equal(analyzed.length, 2);
+    assert.equal(saved.length, 2);
+    assert.equal(analyzed[0].words, removeIntro === false ? 403 : 2);
+    assert.equal(analyzed[0].readTime, removeIntro === false ? "3 min read" : "1 min read");
+    assert.equal(analyzed[0].preview.includes("Intro"), removeIntro === false);
+    assert.equal(saved[0].contentHtml.includes("Intro"), removeIntro === false);
+    assert.equal(saved[0].contentHtml.includes("intro.jpg"), removeIntro === false);
+    assert.equal(saved[0].readTime, analyzed[0].readTime);
+    assert.doesNotMatch(saved[1].contentHtml, /Intro|intro.jpg/);
+    assert.match(saved[0].contentHtml, /First body/);
+    assert.match(saved[1].contentHtml, /Second body/);
+  }
+  const noIntro = '<h2>Chapter 1: One</h2><p>Body.</p>';
+  assert.deepEqual(analyzeSeries(noIntro), analyzeSeries(noIntro, { removeIntro: false }));
 });

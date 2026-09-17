@@ -16,9 +16,12 @@ The second chapter's content…
 
 Click **Analyze chapters** below the editor. The preview shows each part's number,
 title, word count, reading time, content excerpt and generated URL. Chapters must
-be consecutive, starting at 1, with a nonempty title and body. An introduction
-before Chapter 1 is included in the first part. Editing the content invalidates
-the preview; analyze again before saving.
+be consecutive, starting at 1, with a nonempty title and body. Content before
+Chapter 1 is the intro. **Remove intro** is checked by default, so only chapter
+content is saved. Uncheck it to keep the intro at the beginning of Part 1; it
+never creates a separate intro page. The full text stays in the editor. Editing
+the content or changing this option invalidates the preview; analyze again
+before saving. Preview excerpts, word counts and reading times reflect the option.
 
 **Save series** creates all parts in one D1 batch transaction. Each part inherits
 the author, image, categories, featured setting and draft/published status. The

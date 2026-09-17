@@ -57,7 +57,8 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
   const [post, setPost] = useState<EditorPost>(() => seriesMode ? { ...emptyPost, category: initialCategories[0] || "Series", categories: initialCategories.includes("Series") ? initialCategories : ["Series", ...initialCategories], seriesTitle: initialSeriesTitle || null, partNumber: Math.max(1, initialPartNumber), author: initialAuthor, imageUrl: initialImageUrl } : emptyPost);
   const [loading, setLoading] = useState(Boolean(postId)); const [saving, setSaving] = useState(false); const [uploading, setUploading] = useState(false); const [message, setMessage] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<{ source: string; parts: AnalyzedPart[] } | null>(null);
+  const [removeIntro, setRemoveIntro] = useState(true);
+  const [analysis, setAnalysis] = useState<{ source: string; removeIntro: boolean; parts: AnalyzedPart[] } | null>(null);
   const editor = useRef<TinyEditorInstance | null>(null);
   const featuredUpload = useRef<HTMLInputElement>(null);
 
@@ -99,12 +100,12 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
     try {
       await editor.current?.uploadImages();
       const source = editor.current?.getContent() || post.contentHtml;
-      const response = await fetch("/api/admin/series/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contentHtml: source }) });
+      const response = await fetch("/api/admin/series/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ contentHtml: source, removeIntro }) });
       if (response.status === 401) { window.location.href = "/admin/login"; return; }
       const result = await response.json() as { parts?: AnalyzedPart[]; message?: string };
       if (!response.ok || !result.parts?.length) throw new Error(result.message || t("analysisFailed"));
       if ((editor.current?.getContent() || post.contentHtml) !== source) throw new Error(t("analyzeBeforeSave"));
-      setAnalysis({ source, parts: result.parts });
+      setAnalysis({ source, removeIntro, parts: result.parts });
     } catch (error) { setMessage(error instanceof Error ? error.message : t("analysisFailed")); }
     finally { setAnalyzing(false); }
   }
@@ -115,8 +116,8 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
     const shouldAddNext = ((event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value === "add-next";
     try {
       await editor.current?.uploadImages();
-      const current = { ...post, contentHtml: editor.current?.getContent() || post.contentHtml };
-      if (isBulkSeries && (!analysis || analysis.source !== current.contentHtml)) {
+      const current = { ...post, contentHtml: editor.current?.getContent() || post.contentHtml, ...(isBulkSeries ? { removeIntro } : {}) };
+      if (isBulkSeries && (!analysis || analysis.source !== current.contentHtml || analysis.removeIntro !== removeIntro)) {
         setAnalysis(null);
         throw new Error(t("analyzeBeforeSave"));
       }
@@ -194,6 +195,8 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
         />
       </section>
       {isBulkSeries && <section className="admin-panel series-analysis" aria-busy={analyzing}>
+        <label className="admin-check"><input type="checkbox" checked={removeIntro} disabled={saving || uploading || analyzing} onChange={(event) => { setRemoveIntro(event.target.checked); setAnalysis(null); }} aria-describedby="series-intro-help" />{t("removeIntro")}</label>
+        <p id="series-intro-help">{t("removeIntroHint")}</p>
         <button type="button" className="admin-primary" disabled={saving || uploading || analyzing} onClick={analyzeChapters}>{analyzing ? t("analyzingChapters") : t("analyzeChapters")}</button>
         <p role="status">{analysis ? t("chaptersFound", { count: analysis.parts.length }) : t("analyzeBeforeSave")}</p>
         {analysis && <><p>{t("seriesSharedDetails")}</p><ol className="series-part-preview">{analysis.parts.map((part) => <li key={part.partNumber}>

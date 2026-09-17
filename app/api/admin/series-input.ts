@@ -46,7 +46,7 @@ function normalizeLines(nodes: ChildNode[]): ChildNode[] {
   });
 }
 
-export function analyzeSeries(content: unknown): SeriesPart[] {
+export function analyzeSeries(content: unknown, { removeIntro = true }: { removeIntro?: boolean } = {}): SeriesPart[] {
   if (typeof content !== "string" || !content.trim()) throw new Error("Nhập toàn bộ truyện trước khi phân tích. / Enter the full story first.");
   const nodes = normalizeLines(parseDocument(sanitizePostHtml(content)).children);
   const parts: SeriesPart[] = [];
@@ -86,13 +86,13 @@ export function analyzeSeries(content: unknown): SeriesPart[] {
   for (const [index, children] of groups) {
     if (index >= 0) parts[index].contentHtml = DomUtils.getOuterHTML(children);
   }
-  // Do not silently discard a synopsis or introduction before Chapter 1.
+  // Everything before Chapter 1 is the intro; keep it only when requested.
   const introduction = DomUtils.getOuterHTML(groups.get(-1) || []);
   for (const part of parts) {
     const text = DomUtils.innerText(parseDocument(part.contentHtml).children).replace(/\s+/g, " ").trim();
     if (!text) throw new Error(`Chapter ${part.partNumber} chưa có nội dung. / Chapter ${part.partNumber} has no content.`);
   }
-  parts[0].contentHtml = introduction + parts[0].contentHtml;
+  if (!removeIntro) parts[0].contentHtml = introduction + parts[0].contentHtml;
   for (const part of parts) {
     const text = DomUtils.innerText(parseDocument(part.contentHtml).children).replace(/\s+/g, " ").trim();
     part.words = text.split(/\s+/).length;
@@ -108,7 +108,7 @@ export function prepareSeries(value: unknown): PostInput[] {
   const seriesTitle = typeof input.seriesTitle === "string" ? input.seriesTitle.trim() : "";
   if (!seriesTitle || seriesTitle.length > 160) throw new Error("Tên series phải có 1–160 ký tự. / Series title must contain 1–160 characters.");
   const categories = Array.isArray(input.categories) ? [...new Set(["Series", ...input.categories])] : ["Series"];
-  return analyzeSeries(input.contentHtml).map((part) => {
+  return analyzeSeries(input.contentHtml, { removeIntro: input.removeIntro !== false }).map((part) => {
     const result = validatePostInput({
       ...input, ...part, seriesTitle, categories, category: "Series",
       slug: categorySlug(`${seriesTitle}-part-${part.partNumber}-${part.title}`),
