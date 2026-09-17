@@ -11,6 +11,14 @@ export async function listPublishedPosts() { return getDb().select().from(posts)
 export async function findPostById(id: number) { return (await getDb().select().from(posts).where(eq(posts.id, id)).limit(1))[0] ?? null; }
 export async function findPostBySlug(slug: string) { return (await getDb().select().from(posts).where(eq(posts.slug, slug)).limit(1))[0] ?? null; }
 export async function createPost(value: NewPostRecord) { return (await getDb().insert(posts).values(value).returning())[0]; }
+export async function createSeriesPosts(values: NewPostRecord[]) {
+  if (!values.length) throw new Error("No series parts to create.");
+  const db = getDb();
+  const queries = values.map((value) => db.insert(posts).values(value).returning());
+  // D1 batch executes in a transaction: a failure rolls back every part.
+  const result = await db.batch([queries[0], ...queries.slice(1)]);
+  return result.flat();
+}
 export async function updatePost(id: number, value: Partial<NewPostRecord>) { return (await getDb().update(posts).set(value).where(eq(posts.id, id)).returning())[0] ?? null; }
 export async function deletePost(id: number) { return (await getDb().update(posts).set({ status: "deleted", featured: false, updatedAt: new Date().toISOString() }).where(eq(posts.id, id)).returning())[0] ?? null; }
 export async function incrementPostViews(slug: string) { return (await getDb().update(posts).set({ views: sql`${posts.views} + 1` }).where(eq(posts.slug, slug)).returning({ views: posts.views }))[0]?.views ?? null; }

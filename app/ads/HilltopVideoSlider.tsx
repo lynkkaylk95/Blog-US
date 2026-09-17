@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { adConfig } from "./config";
 
 const hilltopVideoSliderSrc =
   "https://shameful-farm.com/b/X.VwszdyGNlU0rYUWtcc/aexmX9-ujZpUqlJk_PGTVc/zgMHDckAz_NuTBMqt/NCzRM/w/OtT/Mo1wN/wy";
@@ -10,6 +11,7 @@ export function HilltopVideoSlider() {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (!adConfig.enabled) return;
     if (pathname.startsWith("/admin")) return;
     if (document.querySelector('script[data-hilltop-video-slider="true"]')) return;
 

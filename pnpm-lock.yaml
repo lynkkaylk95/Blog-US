@@ -11,9 +11,15 @@ importers:
       '@tinymce/tinymce-react':
         specifier: ^6.3.0
         version: 6.3.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tinymce@8.0.0)
+      domhandler:
+        specifier: 5.0.3
+        version: 5.0.3
       drizzle-orm:
         specifier: 0.45.2
         version: 0.45.2(@cloudflare/workers-types@5.20260804.1)
+      htmlparser2:
+        specifier: 10.1.0
+        version: 10.1.0
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.7(supports-color@10.2.2))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -72,6 +78,9 @@ importers:
       tailwindcss:
         specifier: 4.2.1
         version: 4.2.1
+      tsx:
+        specifier: 4.23.1
+        version: 4.23.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3

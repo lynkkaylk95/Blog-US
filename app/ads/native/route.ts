@@ -70,7 +70,9 @@ export async function GET(request: Request) {
   const requestedSlot = new URL(request.url).searchParams.get("slot");
   const placement = isNativeAdPlacement(requestedSlot) ? requestedSlot : "inline";
   const slot = adConfig.nativeAds[placement];
-  const html = slot.enabled ? frameHtml(placement) : "<!doctype html><title>Advertisement unavailable</title>";
+  const html = adConfig.enabled && slot.enabled
+    ? frameHtml(placement)
+    : "<!doctype html><title>Advertisement unavailable</title>";
 
   return new Response(html, {
     headers: {

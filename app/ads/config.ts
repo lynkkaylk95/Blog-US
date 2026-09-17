@@ -6,7 +6,8 @@ const currentNativeZoneId = "fa440f56b6e1471dc9cd83adbf2d7820";
 
 export const adConfig = {
   provider: "adsterra",
-  enabled: true,
+  // Temporary site-wide pause. Set this back to true to resume all ads.
+  enabled: false,
   nativeFrameUrl: "/ads/native",
   nativeAds: {
     // Replace these individually after creating the matching Adsterra zones.

@@ -5,6 +5,11 @@ export type AdminLocale = "en" | "vi";
 
 const translations = {
   en: {
+    bulkSeriesDescription: "Paste the full story, analyze its chapters, then save each part as a separate page.",
+    fullStoryContent: "Full story content", chapterFormatHint: "Put each heading on its own line: Chapter 1: Chapter title. Number chapters consecutively from 1. Any introduction before Chapter 1 stays in the first part.",
+    analyzeChapters: "Analyze chapters", analyzingChapters: "Analyzing chapters…", analysisFailed: "Could not analyze chapters.",
+    chaptersFound: "Found {count} parts. Review the list before saving.", analyzeBeforeSave: "Analyze chapters before saving. After changing the content, analyze it again.",
+    seriesSharedDetails: "Each part uses the series author, cover image, categories and publication status. Reading time is calculated for each part.", wordCount: "words", saveSeries: "Save series",
     addSeries: "Add series", series: "Series", newSeriesPart: "Add series part", seriesEditorDescription: "Create a connected series one part at a time.", partName: "Part name", currentPart: "Part being added", addNextPart: "Save & add Part {part}",
     seriesTitle: "Series title", partNumber: "Part number",
     language: "Language", english: "English", vietnamese: "Tiếng Việt", overview: "Overview", posts: "Posts", addStory: "Add story", users: "Users", viewWebsite: "View website", settings: "Settings", signOut: "Sign out", contentManagement: "Content management", openSite: "Open site",
@@ -15,6 +20,11 @@ const translations = {
     system: "System", settingsDescription: "Configuration is managed securely through Cloudflare environment variables.", requiredConfiguration: "Required configuration", d1Binding: "D1 binding", sessionSecret: "Session signing secret", canonicalWebsite: "Canonical website", secretNote: "Secrets are never displayed in the browser. Change them from the Cloudflare dashboard.", usersDescription: "View and manage everyone who can access the website administration area.", addUser: "Add user", name: "Name", email: "Email", userAdded: "User added successfully.", userList: "Website managers", noUsers: "No website managers found.", primaryAdmin: "Primary administrator", deleteUserConfirm: "Delete this user? They will no longer be able to sign in.", changePassword: "Change password", currentPassword: "Current password", accountEmailOptional: "Account email (leave blank for primary admin)", passwordChanged: "Password changed successfully.",
   },
   vi: {
+    bulkSeriesDescription: "Nhập toàn bộ truyện, phân tích chương rồi lưu mỗi part thành một trang riêng.",
+    fullStoryContent: "Nội dung toàn bộ truyện", chapterFormatHint: "Đặt mỗi tiêu đề trên một dòng riêng: Chapter 1: Tên chương. Đánh số liên tục từ 1. Phần giới thiệu trước Chapter 1 sẽ được giữ trong part đầu tiên.",
+    analyzeChapters: "Phân tích chương", analyzingChapters: "Đang phân tích chương…", analysisFailed: "Không thể phân tích chương.",
+    chaptersFound: "Đã tìm thấy {count} part. Kiểm tra danh sách trước khi lưu.", analyzeBeforeSave: "Phân tích chương trước khi lưu. Nếu sửa nội dung, hãy phân tích lại.",
+    seriesSharedDetails: "Mỗi part dùng chung tác giả, ảnh đại diện, danh mục và trạng thái xuất bản của series. Thời gian đọc được tính riêng cho từng part.", wordCount: "từ", saveSeries: "Lưu series",
     addSeries: "Thêm series", series: "Series", newSeriesPart: "Thêm part cho series", seriesEditorDescription: "Tạo series theo từng part được liên kết với nhau.", partName: "Tên riêng của part", currentPart: "Part đang thêm", addNextPart: "Lưu và thêm Part {part}",
     seriesTitle: "Tên series", partNumber: "Số part",
     language: "Ngôn ngữ", english: "English", vietnamese: "Tiếng Việt", overview: "Tổng quan", posts: "Bài viết", addStory: "Thêm bài viết", users: "Người dùng", viewWebsite: "Xem trang web", settings: "Cài đặt", signOut: "Đăng xuất", contentManagement: "Quản lý nội dung", openSite: "Mở trang web",

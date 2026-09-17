@@ -1,5 +1,5 @@
 import sanitizeHtml from "sanitize-html";
-import { categorySlugs } from "../../content";
+import { categorySlugs } from "../../categories";
 
 export type PostInput = {
   slug: string; title: string; excerpt: string; category: string; categories: string; imageUrl: string; imageAlt: string;
@@ -26,13 +26,17 @@ export function validatePostInput(value: unknown): { data?: PostInput; message?:
   const minutes = Number.parseInt(String(input.readTime), 10);
   if (!Number.isInteger(minutes) || minutes < 1) return { message: "Read time must be a positive number of minutes." };
   const status = input.status === "published" ? "published" : "draft";
-  const contentHtml = sanitizeHtml(String(input.contentHtml), {
+  const contentHtml = sanitizePostHtml(String(input.contentHtml));
+  if (!sanitizeHtml(contentHtml, { allowedTags: [] }).trim()) return { message: "Post content is empty." };
+  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: categories[0], categories: JSON.stringify(categories), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true, seriesTitle: isSeries ? seriesTitle : null, partNumber: isSeries ? partNumber : null } };
+}
+
+export function sanitizePostHtml(html: string) {
+  return sanitizeHtml(html, {
     allowedTags: ["p", "br", "h2", "h3", "h4", "strong", "em", "u", "s", "blockquote", "ul", "ol", "li", "a", "img", "figure", "figcaption", "video", "source", "iframe", "span", "div"],
     allowedAttributes: { a: ["href", "target", "rel"], img: ["src", "alt", "width", "height"], video: ["src", "controls", "poster"], source: ["src", "type"], iframe: ["src", "title", "allow", "allowfullscreen", "loading"], span: ["style"], p: ["style"], div: ["style"] },
     allowedStyles: { "*": { color: [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "background-color": [/^#[0-9a-f]{3,8}$/i, /^rgb\(/], "font-family": [/^[\w\s,'-]+$/], "font-size": [/^\d{1,3}(px|rem|em|%)$/], "text-align": [/^(left|right|center|justify)$/] } },
     allowedSchemes: ["http", "https"], allowedIframeHostnames: ["www.youtube.com", "youtube.com", "player.vimeo.com"],
     transformTags: { a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }, true), iframe: sanitizeHtml.simpleTransform("iframe", { loading: "lazy" }, true) },
   });
-  if (!sanitizeHtml(contentHtml, { allowedTags: [] }).trim()) return { message: "Post content is empty." };
-  return { data: { slug, title: String(input.title).trim(), excerpt: "", category: categories[0], categories: JSON.stringify(categories), imageUrl: String(input.imageUrl), imageAlt: "", contentHtml, readTime: `${minutes} min read`, author: String(input.author).trim(), status, featured: input.featured === true, seriesTitle: isSeries ? seriesTitle : null, partNumber: isSeries ? partNumber : null } };
 }

@@ -81,7 +81,7 @@ export function AdminDashboard() {
         next.delete(key);
     else
         next.add(key); return next; }); }
-    function insertPartUrl(post: Post) { return `/admin/series/new?${new URLSearchParams({ seriesTitle: post.seriesTitle || "", partNumber: String(post.partNumber || 1), categories: JSON.stringify(postCategories(post)), author: post.author, imageUrl: post.imageUrl })}`; }
+    function insertPartUrl(post: Post) { return `/admin/series/new?${new URLSearchParams({ mode: "part", seriesTitle: post.seriesTitle || "", partNumber: String(post.partNumber || 1), categories: JSON.stringify(postCategories(post)), author: post.author, imageUrl: post.imageUrl })}`; }
     async function remove(post: Post) { if (!confirm(t("deleteConfirm", { title: post.title })))
         return; const response = await fetch(`/api/admin/posts/${post.id}`, { method: "DELETE" }); if (response.ok)
         setPosts((items) => items.filter((item) => item.id !== post.id));
