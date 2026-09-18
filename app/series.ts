@@ -1,3 +1,10 @@
+import { categorySlug } from "./categories";
+
+export function seriesPartSlug(partNumber: number, title: string) {
+  const titleSlug = categorySlug(title);
+  return titleSlug ? `chapter-${partNumber}-${titleSlug}` : "";
+}
+
 export function normalizeSeriesTitle(value: string) {
   return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
 }

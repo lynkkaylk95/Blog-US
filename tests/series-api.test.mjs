@@ -40,9 +40,9 @@ test("series analysis, atomic creation, page navigation, conflicts and access co
     assert.equal(result.count, 3);
     const saved = (await rows()).filter((post) => post.seriesTitle === title).sort((a, b) => a.partNumber - b.partNumber);
     assert.equal(saved.length, 3);
-    assert.equal(saved[0].slug, `arrival-${runId}`);
-    assert.equal(saved[1].slug, `discovery-${runId}`);
-    assert.equal(saved[2].slug, `home-${runId}`);
+    assert.equal(saved[0].slug, `chapter-1-arrival-${runId}`);
+    assert.equal(saved[1].slug, `chapter-2-discovery-${runId}`);
+    assert.equal(saved[2].slug, `chapter-3-home-${runId}`);
     for (const [index, part] of saved.entries()) {
       assert.equal(part.partNumber, index + 1);
       assert.equal(part.author, payload.author);
@@ -60,7 +60,7 @@ test("series analysis, atomic creation, page navigation, conflicts and access co
 
     const conflict = await send("/api/admin/series", { ...splitPayload, seriesTitle: `${title} other` });
     assert.equal(conflict.status, 409);
-    assert.match((await conflict.json()).message, new RegExp(`arrival-${runId}`));
+    assert.match((await conflict.json()).message, new RegExp(`chapter-1-arrival-${runId}`));
     assert.equal((await rows()).filter((post) => post.seriesTitle === `${title} other`).length, 0);
 
     const racePayload = { ...splitPayload, parts: extracted.parts.map((part) => ({ ...part, title: `${part.title} draft` })), seriesTitle: `${title} concurrent`, status: "draft", removeIntro: false };

@@ -61,8 +61,8 @@ test("rejects missing, duplicate, skipped, out-of-order and empty chapters", () 
 test("creates ordinary series post inputs, sanitizes content and calculates per-part reading times", () => {
   const parts = prepareSeries({ seriesTitle: "A New Story", categories: ["Life Stories"], author: "A Writer", imageUrl: "https://example.com/cover.jpg", status: "published", featured: true, contentHtml: `<h2>Chapter 1: Beginning</h2><p onclick="bad()">${"word ".repeat(401)}</p><script>alert(1)</script><h2>Chapter 2: End</h2><p>Short ending.</p>` });
   assert.equal(parts.length, 2);
-  assert.equal(parts[0].slug, "beginning");
-  assert.equal(parts[1].slug, "end");
+  assert.equal(parts[0].slug, "chapter-1-beginning");
+  assert.equal(parts[1].slug, "chapter-2-end");
   assert.equal(parts[0].readTime, "3 min read");
   assert.equal(parts[1].readTime, "1 min read");
   for (const part of parts) {
@@ -88,8 +88,8 @@ test("saves extracted parts separately and applies intro only once when requeste
   const split = splitSeries('<p>Original intro.</p><h2>Chapter 1: Một cái tên</h2><p>First body.</p><h2>Chapter 2: Return</h2><p>Second body.</p>');
   const input = { seriesTitle: "Series", author: "Writer", imageUrl: "https://example.com/cover.jpg", ...split, introHtml: '<p>Edited intro.</p><script>alert(1)</script>' };
   const withoutIntro = prepareSeries(input);
-  assert.equal(withoutIntro[0].slug, "mot-cai-ten");
-  assert.equal(withoutIntro[1].slug, "return");
+  assert.equal(withoutIntro[0].slug, "chapter-1-mot-cai-ten");
+  assert.equal(withoutIntro[1].slug, "chapter-2-return");
   assert.doesNotMatch(withoutIntro[0].contentHtml, /intro/i);
   const withIntro = prepareSeries({ ...input, removeIntro: false });
   assert.equal(withIntro[0].contentHtml, "<p>Edited intro.</p><p>First body.</p>");
@@ -98,15 +98,16 @@ test("saves extracted parts separately and applies intro only once when requeste
   assert.equal(prepareSeries({ ...input, introHtml: "", removeIntro: false })[0].contentHtml, "<p>First body.</p>");
 });
 
-test("validates extracted parts and rejects title-only slug collisions", () => {
+test("validates extracted parts and uses the part number to disambiguate repeated titles", () => {
   const input = { seriesTitle: "Series", author: "Writer", imageUrl: "https://example.com/cover.jpg", introHtml: "" };
   const valid = { partNumber: 1, title: "A title", contentHtml: "<p>Body.</p>" };
   for (const parts of [[], null, [{ ...valid, partNumber: 2 }], [{ ...valid, contentHtml: "" }], [{ ...valid, title: "!!!" }]]) {
     assert.throws(() => prepareSeries({ ...input, parts }));
   }
-  assert.throws(() => prepareSeries({ ...input, parts: [valid, { ...valid, partNumber: 2, title: "Á title!" }] }), /slug/);
+  const repeatedTitles = prepareSeries({ ...input, parts: [valid, { ...valid, partNumber: 2, title: "Á title!" }] });
+  assert.deepEqual(repeatedTitles.map((part) => part.slug), ["chapter-1-a-title", "chapter-2-a-title"]);
   const sanitized = prepareSeries({ ...input, parts: [{ ...valid, contentHtml: '<p onclick="bad()">Body.</p><script>alert(1)</script>', slug: "forged-slug", words: 99999, readTime: "999 min read" }] });
-  assert.equal(sanitized[0].slug, "a-title");
+  assert.equal(sanitized[0].slug, "chapter-1-a-title");
   assert.equal(sanitized[0].readTime, "1 min read");
   assert.equal(sanitized[0].contentHtml, "<p>Body.</p>");
 });

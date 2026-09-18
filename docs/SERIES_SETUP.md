@@ -29,9 +29,9 @@ The intro and this option can be changed after extraction without losing parts.
 To edit chapter content, use **Merge back to edit chapters**, edit the full story,
 then analyze again. Merging preserves the current intro and part names.
 
-Slugs use only the part title: `Chapter 1: The Return` becomes `/story/the-return`.
-They do not include the series title or part number. Part names can be corrected
-in the generated list. If two names produce the same slug, or an existing post
+Slugs use the chapter number and part title: `Chapter 1: The Return` becomes
+`/story/chapter-1-the-return`. They do not include the series title. Part names
+can be corrected in the generated list. If two names produce the same slug, or an existing post
 already uses it, saving is blocked with a message asking for a different name.
 No suffix is added automatically and existing posts are not renamed.
 

@@ -6,6 +6,7 @@ import { Editor } from "@tinymce/tinymce-react";
 import { useAdminLocale } from "./AdminLocale";
 import { AdminIcon } from "./AdminIcon";
 import { categorySlug, storyCategories } from "../../categories";
+import { seriesPartSlug } from "../../series";
 
 const categoryLabels = [
   { value: "Family & Legacy", label: "Family & Legacy (Gia đình & Di sản)" },
@@ -74,9 +75,9 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
   function removeCategory(value: string) { setPost((current) => { const selected = current.categories.filter((item) => item !== value); return { ...current, category: selected[0] || "", categories: selected }; }); }
   const isSeries = seriesMode || post.categories.includes("Series");
   const isBulkSeries = isSeries && !postId && !manualSeriesPart;
-  function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: createSlug(title) })); }
+  function titleChanged(title: string) { setPost((current) => ({ ...current, title, slug: isSeries ? seriesPartSlug(current.partNumber || 1, title) : createSlug(title) })); }
   function seriesTitleChanged(seriesTitle: string) { set("seriesTitle", seriesTitle); }
-  function partNumberChanged(partNumber: number) { set("partNumber", partNumber); }
+  function partNumberChanged(partNumber: number) { setPost((current) => ({ ...current, partNumber, slug: seriesPartSlug(partNumber, current.title) })); }
   async function uploadFile(file: Blob, progress?: (percent: number) => void) {
     const data = new FormData(); data.set("file", file); progress?.(10);
     const response = await fetch("/api/admin/upload", { method: "POST", body: data });
@@ -220,7 +221,7 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
         {analysis && <><p>{t("seriesSharedDetails")}</p><ol className="series-part-preview">{analysis.parts.map((part) => <li key={part.partNumber}>
           <strong>Part {part.partNumber}: {part.title}</strong>
           <label className="series-part-title">{t("partName")}<input aria-label={`${t("partName")} ${part.partNumber}`} required value={part.title} disabled={saving || analyzing} onChange={(event) => setAnalysis((current) => current ? { parts: current.parts.map((item) => item.partNumber === part.partNumber ? { ...item, title: event.target.value } : item) } : null)} /></label>
-          <code>/story/{createSlug(part.title)}</code>
+          <code>/story/{seriesPartSlug(part.partNumber, part.title)}</code>
           <details className="series-part-details">
             <summary aria-controls={`series-part-content-${part.partNumber}`}>
               <span className="series-part-show">{t("showPartContent")}</span>

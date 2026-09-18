@@ -1,6 +1,6 @@
 import { DomUtils, parseDocument } from "htmlparser2";
 import { Element, Text, isTag, isText, type ChildNode } from "domhandler";
-import { categorySlug } from "../../categories";
+import { seriesPartSlug } from "../../series";
 import { sanitizePostHtml, validatePostInput, type PostInput } from "./post-input";
 
 const blockTags = new Set(["p", "div", "h2", "h3", "h4", "blockquote", "ul", "ol", "li", "figure", "figcaption"]);
@@ -140,7 +140,7 @@ export function prepareSeries(value: unknown): PostInput[] {
   }
   const slugs = new Set<string>();
   return parts.map((part) => {
-    const slug = categorySlug(part.title);
+    const slug = seriesPartSlug(part.partNumber, part.title);
     if (!slug) throw new Error(`Part ${part.partNumber}: tên không tạo được slug. / The title must contain letters or numbers usable in a URL.`);
     if (slugs.has(slug)) throw new Error(`Part ${part.partNumber}: slug "${slug}" bị trùng. Hãy đổi tên part. / Duplicate part title URL.`);
     slugs.add(slug);
