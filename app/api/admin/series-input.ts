@@ -5,7 +5,7 @@ import { sanitizePostHtml, validatePostInput, type PostInput } from "./post-inpu
 
 const blockTags = new Set(["p", "div", "h2", "h3", "h4", "blockquote", "ul", "ol", "li", "figure", "figcaption"]);
 const chapterPattern = /^Chapter\s+(\d+)\s*:\s*(.+)$/i;
-export type SeriesPart = { partNumber: number; title: string; contentHtml: string; characters: number; words: number; readTime: string; preview: string };
+export type SeriesPart = { partNumber: number; title: string; contentHtml: string; words: number; readTime: string; preview: string };
 
 function copyElement(node: Element, children: ChildNode[]) {
   return new Element(node.name, { ...node.attribs }, children);
@@ -69,7 +69,7 @@ export function splitSeries(content: unknown): { introHtml: string; parts: Serie
           throw new Error(`Sai thứ tự chương: cần Chapter ${parts.length + 1}, gặp Chapter ${match[1]}. / Chapters must be consecutive, starting at 1.`);
         }
         current = parts.length;
-        parts.push({ partNumber, title: match[2].trim(), contentHtml: "", characters: 0, words: 0, readTime: "", preview: "" });
+        parts.push({ partNumber, title: match[2].trim(), contentHtml: "", words: 0, readTime: "", preview: "" });
       } else if (leaf && /^Chapter\s+\d+\s*:/i.test(text)) {
         throw new Error(`Chapter ${parts.length + 1} thiếu tên chương. / A chapter title is required after the colon.`);
       } else if (isTag(node) && node.children.some(containsBlock)) {
@@ -98,7 +98,7 @@ function validateParts(value: unknown): SeriesPart[] {
     if (part.partNumber !== index + 1) throw new Error(`Cần Part ${index + 1}. / Parts must be consecutive, starting at 1.`);
     if (typeof part.title !== "string" || !part.title.trim()) throw new Error(`Part ${index + 1}: thiếu tên. / Missing title.`);
     if (typeof part.contentHtml !== "string") throw new Error(`Part ${index + 1}: thiếu nội dung. / Missing content.`);
-    return { partNumber: index + 1, title: part.title.trim(), contentHtml: sanitizePostHtml(part.contentHtml), characters: 0, words: 0, readTime: "", preview: "" };
+    return { partNumber: index + 1, title: part.title.trim(), contentHtml: sanitizePostHtml(part.contentHtml), words: 0, readTime: "", preview: "" };
   });
   for (const part of parts) {
     const text = DomUtils.innerText(parseDocument(part.contentHtml).children).replace(/\s+/g, " ").trim();
@@ -110,7 +110,6 @@ function validateParts(value: unknown): SeriesPart[] {
 function updatePartStats(parts: SeriesPart[]) {
   for (const part of parts) {
     const text = DomUtils.innerText(parseDocument(part.contentHtml).children).replace(/\s+/g, " ").trim();
-    part.characters = Array.from(text.normalize("NFC")).length;
     part.words = text.split(/\s+/).length;
     part.readTime = `${Math.max(1, Math.ceil(part.words / 200))} min read`;
     part.preview = text.slice(0, 180);

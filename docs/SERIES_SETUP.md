@@ -16,10 +16,10 @@ The second chapter's content…
 
 Click **Analyze chapters** below the editor. The complete chapter bodies move
 into separate parts below; only the intro before Chapter 1 stays in the original
-editor. Every part shows its generated URL and character count. Click **Show
+editor. Every part shows its generated URL and word count. Click **Show
 content** to expand the full formatted body, and click again to collapse it.
-Parts start collapsed and can be opened independently. The character count
-includes spaces in the chapter body, with whitespace normalized; it excludes
+Parts start collapsed and can be opened independently. The word count
+counts whitespace-separated words in the chapter body; it excludes
 HTML, the chapter title and the separate intro. Chapters
 must be consecutive, starting at 1, with a nonempty title and body.
 

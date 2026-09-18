@@ -52,7 +52,7 @@ type TinyEditorInstance = {
   insertContent(html: string): void;
   uploadImages(): Promise<unknown>;
 };
-type AnalyzedPart = { partNumber: number; title: string; contentHtml: string; characters: number; words: number; readTime: string; preview: string };
+type AnalyzedPart = { partNumber: number; title: string; contentHtml: string; words: number; readTime: string; preview: string };
 
 function escapeHtml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -225,7 +225,7 @@ export function PostEditor({ postId, seriesMode = false, manualSeriesPart = fals
             <summary aria-controls={`series-part-content-${part.partNumber}`}>
               <span className="series-part-show">{t("showPartContent")}</span>
               <span className="series-part-hide">{t("hidePartContent")}</span>
-              <span className="series-part-characters" title={t("characterCountHint")}>{part.characters.toLocaleString(locale === "vi" ? "vi-VN" : "en-US")} {t("characters")}</span>
+              <span className="series-part-words" title={t("wordCountHint")}>{part.words.toLocaleString(locale === "vi" ? "vi-VN" : "en-US")} {t("wordCount")}</span>
             </summary>
             <div id={`series-part-content-${part.partNumber}`} className="series-part-content" dangerouslySetInnerHTML={{ __html: part.contentHtml }} />
           </details>

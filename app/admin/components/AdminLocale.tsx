@@ -5,7 +5,7 @@ export type AdminLocale = "en" | "vi";
 
 const translations = {
   en: {
-    showPartContent: "Show content", hidePartContent: "Hide content", characters: "characters", characterCountHint: "Chapter body characters, including spaces; HTML and the chapter title are excluded. Whitespace is normalized.",
+    showPartContent: "Show content", hidePartContent: "Hide content", wordCountHint: "Chapter body words, separated by whitespace; HTML, the chapter title and the separate intro are excluded.",
     bulkSeriesDescription: "Paste the full story, analyze its chapters, then save each part as a separate page.",
     fullStoryContent: "Full story content", chapterFormatHint: "Put each heading on its own line: Chapter 1: Chapter title. Number chapters consecutively from 1. Content before Chapter 1 is the intro.",
     removeIntro: "Remove intro", removeIntroHint: "Checked by default: exclude the intro when saving. Uncheck to keep it at the beginning of Part 1.",
@@ -23,7 +23,7 @@ const translations = {
     system: "System", settingsDescription: "Configuration is managed securely through Cloudflare environment variables.", requiredConfiguration: "Required configuration", d1Binding: "D1 binding", sessionSecret: "Session signing secret", canonicalWebsite: "Canonical website", secretNote: "Secrets are never displayed in the browser. Change them from the Cloudflare dashboard.", usersDescription: "View and manage everyone who can access the website administration area.", addUser: "Add user", name: "Name", email: "Email", userAdded: "User added successfully.", userList: "Website managers", noUsers: "No website managers found.", primaryAdmin: "Primary administrator", deleteUserConfirm: "Delete this user? They will no longer be able to sign in.", changePassword: "Change password", currentPassword: "Current password", accountEmailOptional: "Account email (leave blank for primary admin)", passwordChanged: "Password changed successfully.",
   },
   vi: {
-    showPartContent: "Xem nội dung", hidePartContent: "Thu gọn nội dung", characters: "ký tự", characterCountHint: "Số ký tự nội dung chương, gồm khoảng trắng; không tính mã HTML và tên chương. Khoảng trắng được chuẩn hóa.",
+    showPartContent: "Xem nội dung", hidePartContent: "Thu gọn nội dung", wordCountHint: "Số từ trong nội dung chương, phân tách bằng khoảng trắng; không tính mã HTML, tên chương và intro riêng.",
     bulkSeriesDescription: "Nhập toàn bộ truyện, phân tích chương rồi lưu mỗi part thành một trang riêng.",
     fullStoryContent: "Nội dung toàn bộ truyện", chapterFormatHint: "Đặt mỗi tiêu đề trên một dòng riêng: Chapter 1: Tên chương. Đánh số liên tục từ 1. Phần nội dung trước Chapter 1 là intro.",
     removeIntro: "Loại bỏ intro", removeIntroHint: "Mặc định được tick: bỏ intro khi lưu. Bỏ tick để giữ intro ở đầu part 1.",

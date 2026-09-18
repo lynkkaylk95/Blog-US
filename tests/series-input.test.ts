@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { analyzeSeries, prepareSeries, splitSeries } from "../app/api/admin/series-input";
 
+test("counts chapter body words rather than characters, excluding headings, markup and intro", () => {
+  const { parts } = splitSeries('<p>Separate intro words.</p><h2>Chapter 1: A long chapter title</h2><p>  Hello <strong>beautiful</strong> world!&nbsp;Again. </p><p>Two\tmore\nwords.</p><h2>Chapter 2: Another title</h2><p>Xin chào bạn.</p>');
+  assert.deepEqual(parts.map((part) => part.words), [7, 3]);
+  assert.equal(parts[0].readTime, "1 min read");
+});
+
 test("splits formatted chapters into titles and separate bodies without losing the introduction", () => {
   const parts = analyzeSeries('<p>Introduction.</p><h2><strong>Chapter 1: The &amp; beginning</strong></h2><p>First <em>body</em>.</p><h3>Chapter 2: The return</h3><p>Second body.</p>', { removeIntro: false });
   assert.deepEqual(parts.map(({ partNumber, title }) => ({ partNumber, title })), [{ partNumber: 1, title: "The & beginning" }, { partNumber: 2, title: "The return" }]);
