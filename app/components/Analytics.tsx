@@ -13,7 +13,10 @@ declare global {
 function initializeGoogleAnalytics(measurementId: string) {
   if (document.querySelector(`script[data-google-analytics="${measurementId}"]`)) return;
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: unknown[]) { window.dataLayer.push(args); };
+  // Google tag expects each command to be stored as the function's Arguments
+  // object. A rest-parameter array looks similar but is not processed reliably.
+  // eslint-disable-next-line prefer-rest-params
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
   window.gtag("consent", "default", { analytics_storage: "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
   window.gtag("js", new Date());
   window.gtag("config", measurementId, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false });
@@ -35,7 +38,12 @@ export function GoogleAnalytics({ measurementId }: { measurementId?: string }) {
     const page = pathname;
     if (page === lastPage.current) return;
     lastPage.current = page;
-    window.gtag("event", "page_view", { page_title: document.title, page_location: window.location.href, page_path: page });
+    window.gtag("event", "page_view", {
+      send_to: measurementId,
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: page,
+    });
   }, [measurementId, pathname]);
 
   return null;
