@@ -1,4 +1,4 @@
-/** Central advertising configuration for the entire website. */
+/** Adsterra and HilltopAds configuration. MaxValue's verification tag lives in app/layout.tsx. */
 export const nativeAdPlacements = ["lead", "inline", "end"] as const;
 export type NativeAdPlacement = (typeof nativeAdPlacements)[number];
 
@@ -6,7 +6,7 @@ const currentNativeZoneId = "fa440f56b6e1471dc9cd83adbf2d7820";
 
 export const adConfig = {
   provider: "adsterra",
-  // Temporary site-wide pause. Set this back to true to resume all ads.
+  // Temporary pause for Adsterra and HilltopAds. Set true to resume these ads.
   enabled: false,
   nativeFrameUrl: "/ads/native",
   nativeAds: {

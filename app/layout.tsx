@@ -38,5 +38,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const configuredCloudflareToken = process.env.NEXT_PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN;
   const googleAnalyticsId = configuredGoogleId && /^G-[A-Z0-9]+$/i.test(configuredGoogleId) ? configuredGoogleId : undefined;
   const cloudflareToken = configuredCloudflareToken && /^[a-f0-9]{32}$/i.test(configuredCloudflareToken) ? configuredCloudflareToken : undefined;
-  return <html lang="en"><body id="top">{children}<BackToTop /><HilltopVideoSlider /><GoogleAnalytics measurementId={googleAnalyticsId} /><CloudflareAnalytics token={cloudflareToken} /></body></html>;
+  return <html lang="en"><head>
+    {/* MaxValue.media verification tag: kept active independently of the legacy ad pause. */}
+    <script defer id="8018941257" src="https://ads.maxvaluead.com/scripts/maxvalue_ads_8018941257.js"></script>
+  </head><body id="top">{children}<BackToTop /><HilltopVideoSlider /><GoogleAnalytics measurementId={googleAnalyticsId} /><CloudflareAnalytics token={cloudflareToken} /></body></html>;
 }
