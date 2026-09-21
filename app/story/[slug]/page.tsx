@@ -3,7 +3,6 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "../../components/Header";
-import { AdSlot } from "../../components/AdSlot";
 import { StoryCard } from "../../components/StoryCard";
 import { categorySlugs, stories as markdownStories } from "../../content";
 import { getPublishedStories, getPublishedStory } from "../../posts-data";
@@ -96,7 +95,6 @@ export default async function StoryPage({ params }: StoryPageProps) {
       <div className="article-byline"><div className="author-avatar">{authorInitials(story.author)}</div><div><b>By <Link href={`/author/${authorSlug(story.author)}`}>{story.author}</Link></b><span>{story.date} · {story.readTime} · <ViewTracker slug={story.slug} initialViews={story.views} /></span>{story.updatedDate !== story.date && <span>Updated {story.updatedDate}</span>}</div><ShareButtons title={story.title} /></div>
     </article>
     <div className="article-image"><Image src={story.image} alt={story.title} fill priority unoptimized={story.image.includes("/media/")} sizes="(max-width: 620px) 100vw, 1100px" /></div>
-    <div className="shell"><AdSlot /></div>
     {story.contentHtml ? <RichStory html={story.contentHtml} recommendations={inlineStories} category={story.category} showEnd={!story.seriesTitle || seriesParts.at(-1)?.slug === story.slug} /> : <Reader chapters={story.chapters} recommendations={inlineStories} category={story.category} showEnd={!story.seriesTitle || seriesParts.at(-1)?.slug === story.slug} />}
     {story.seriesTitle && seriesParts.length > 0 && <PartNavigator seriesTitle={story.seriesTitle} parts={seriesParts} currentSlug={story.slug} />}
     {sameCategoryStories.length > 0 && <section className="more-stories same-category-stories shell"><div className="section-heading"><div><span className="eyebrow">More in this category</span><h2>More {story.category} stories</h2></div><Link href={`/category/${categorySlugs[story.category]}`}>View category →</Link></div><div className="popular-grid">{sameCategoryStories.map((item) => <StoryCard key={item.slug} story={item} />)}</div></section>}

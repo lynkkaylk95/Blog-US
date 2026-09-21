@@ -1,4 +1,3 @@
-import { AdSlot } from "../../components/AdSlot";
 import { InlineRecommendations, type InlineRecommendation } from "../../components/InlineRecommendations";
 
 function splitHtml(html: string) {
@@ -11,5 +10,5 @@ function splitHtml(html: string) {
 
 export function RichStory({ html, recommendations, category, showEnd = true }: { html: string; recommendations: InlineRecommendation[]; category: string; showEnd?: boolean }) {
   const [firstHalf, secondHalf] = splitHtml(html);
-  return <article className="reader reader--paper"><div className="story-body rich-story" dangerouslySetInnerHTML={{ __html: firstHalf }} />{secondHalf && <div className="story-body"><InlineRecommendations stories={recommendations} category={category} /></div>}<div className="story-body rich-story" dangerouslySetInnerHTML={{ __html: secondHalf }} /><div className="story-body"><AdSlot compact placement="end" />{showEnd && <div className="story-end">THE END</div>}</div></article>;
+  return <article className="reader reader--paper"><div className="story-body rich-story" dangerouslySetInnerHTML={{ __html: firstHalf }} />{secondHalf && <div className="story-body"><InlineRecommendations stories={recommendations} category={category} /></div>}<div className="story-body rich-story" dangerouslySetInnerHTML={{ __html: secondHalf }} /><div className="story-body">{showEnd && <div className="story-end">THE END</div>}</div></article>;
 }

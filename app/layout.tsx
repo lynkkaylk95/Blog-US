@@ -4,7 +4,6 @@ import "./content.css";
 import { defaultGoogleAnalyticsId, siteDescription, siteName, siteUrl } from "./site";
 import { CloudflareAnalytics, GoogleAnalytics } from "./components/Analytics";
 import { BackToTop } from "./components/BackToTop";
-import { HilltopVideoSlider } from "./ads/HilltopVideoSlider";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -41,5 +40,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return <html lang="en"><head>
     {/* MaxValue.media verification tag: kept active independently of the legacy ad pause. */}
     <script defer id="8018941257" src="https://ads.maxvaluead.com/scripts/maxvalue_ads_8018941257.js"></script>
-  </head><body id="top">{children}<BackToTop /><HilltopVideoSlider /><GoogleAnalytics measurementId={googleAnalyticsId} /><CloudflareAnalytics token={cloudflareToken} /></body></html>;
+  </head><body id="top">{children}<BackToTop /><GoogleAnalytics measurementId={googleAnalyticsId} /><CloudflareAnalytics token={cloudflareToken} /></body></html>;
 }
