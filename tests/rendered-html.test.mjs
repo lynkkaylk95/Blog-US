@@ -14,7 +14,7 @@ before(async () => {
     env: { ...process.env, SITE_URL: "https://example.com", ADMIN_PASSWORD: "test-password", ADMIN_SESSION_SECRET: "test-session-secret-at-least-32-characters" },
     stdio: "ignore",
   });
-  for (let attempt = 0; attempt < 50; attempt++) {
+  for (let attempt = 0; attempt < 150; attempt++) {
     try { const response = await fetch(`${baseUrl}/`); if (response.ok) return; } catch { /* Wait for the server. */ }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
@@ -53,6 +53,16 @@ test("keeps drafts private and unknown stories return 404", async () => {
   const response = await fetchPage("/story/not-a-real-story");
   assert.equal(response.status, 404);
   assert.match(await response.text(), /Story not found/i);
+});
+
+test("does not publish ad scripts, ad verification files, or automatic downloads", async () => {
+  const homepage = await fetchPage("/");
+  const html = await homepage.text();
+  assert.equal(homepage.status, 200);
+  assert.doesNotMatch(html, /adsterra|hilltop|maxvalue|effectivecpmnetwork|shameful-farm/i);
+  assert.doesNotMatch(html, /<a\b[^>]*\bdownload(?:\s|=|>)/i);
+  assert.equal((await fetchPage("/ads.txt")).status, 404);
+  assert.equal((await fetchPage("/b0278437be392a5a86b0.txt")).status, 404);
 });
 
 test("sitemap and RSS contain every published story", async () => {

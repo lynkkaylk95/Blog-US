@@ -12,6 +12,7 @@ await cp(source, target, {
   recursive: true,
   filter: (path) => {
     if (/([\\/])(README\.md|CHANGELOG\.md|LICENSE\.TXT|package\.json)$/i.test(path)) return false;
+    if (/\.ts$/i.test(path)) return false;
     if (/\.(js|css)$/i.test(path)) return /\.min\.(js|css)$/i.test(path);
     return true;
   },
